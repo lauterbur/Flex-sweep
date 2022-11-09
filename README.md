@@ -1,7 +1,7 @@
 # Flex-sweep
 Versatile tool for detecting selective sweeps with a variety of ages, strengths, starting allele frequencies, and completeness.
 
-# add directory structure that it will create
+Creates the following directory structure:
 # outputDir
 #       |
 #       -- training_data
@@ -54,4 +54,3 @@ Choose a demographic model that represents reasonable expectations for your popu
 
 ###### Sequence to CLASSIFY with existing model (must include the neutral bins for normalizing data to classify, has to be same normalization data as used for training)
 # singularity TODO FlexSweep.py classify outputDir nodeFile --model_loc </path/to/model_dir> --norm_loc </path/to/normalization_data> (--threshold) (--num_task)
-
