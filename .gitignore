@@ -1,0 +1,10 @@
+*sif
+*/*sif
+core*
+*log*
+__pycache__
+*slurm
+test/
+fullTest/
+sifTest/
+*out

@@ -1,0 +1,23 @@
+### configuration file for simulations ###
+
+###### species parameters
+NE_DIST = <fixed|uniform|exponential|normal>
+NE = <current NE> # current! if NE_DIST = uniform, two comma-separated values: low,high; if NE_DIST = normal, two comma-separated values: mean,sd; if NE_DIST = exponential, fixed value: scale 
+MU = <mutation rate> # per bp mutation rate
+MU_DIST = <fixed|uniform|exponential|normal> # as above
+RHO = <recombination rate> # per bp recombination rate
+MU_DIST = <fixed|uniform|exponential|normal> # as above
+
+SEL_DIST = <fixed|uniform|exponential|normal>
+SEL = <selection strength> # strength of selection
+TIME_DIST = <fixed|uniform|exponential|normal>
+TIME = <sweep age> # number of generations ago of the sweep
+SAF_DIST = <fixed|uniform|exponential|normal>
+SAF = <starting allele frequency> # frequency of the swept allele when the sweep began (SAF = 0 gives a de novo sweep, SAF > 0 gives a sweep from standing variation)
+EAF_DIST = <fixed|uniform|exponential|normal>
+EAF = <ending allele frequency> # frequency of the swept allele when the sweep ended (EAF = 1 gives a complete sweep, EAF < 1 gives an incomplete sweep)
+######
+
+###### population demographic parameters
+CHANGESIZE = <> # comma-separated list of population sizes relative to NE (specified above) back in time 
+CHANGETIME = <> # comma-separated list of times the population changed size back in time, in generations

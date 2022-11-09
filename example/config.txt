@@ -1,0 +1,27 @@
+### configuration file for simulations ###
+
+###### species parameters
+NE_DIST = fixed
+NE = 10000 # current!
+MU_DIST = uniform
+MU = 0.00000001,0.0000001 # per bp mutation rate
+RHO_DIST = exponential
+RHO = 0.00000001 # per bp recombination rate
+
+SEL_DIST = uniform
+SEL = 0.005,0.05 # strength of selection
+TIME_DIST = uniform
+TIME = 0,5000 # number of generations ago of the sweep
+SAF_DIST = normal
+SAF = 0.01,0.01 # frequency of the swept allele when the sweep began (SAF = 0 gives a de novo sweep, SAF > 0 gives a sweep from standing variation)
+EAF_DIST = normal
+EAF = 0.99,0.01 # frequency of the swept allele when the sweep ended (EAF = 1 gives a complete sweep, EAF < 1 gives an incomplete sweep)
+######
+
+###### population demographic parameters
+###### comment out CHANGESIZE and CHANGETIME if not simulating population size changes ######
+CHANGESIZE = 1.1,1.2,0.9 # comma-separated list of population sizes relative to NE (specified above) back in time 
+CHANGETIME = 40,2000,3500 # comma-separated list of times the population changed size back in time, in generations
+# using the above settings:
+## thinking back in time, the population decreased to 0.1NE (100) 40 generations ago, then increased to 1.2NE (12000) 2000 generations ago, then decreased to 0.9NE (9000) 3500 generations ago
+## thinking forward in time, the population started at 0.9NE (9000), then increased to 1.2NE (12000) 3500 generations ago, then decreased to 0.1Ne (100) 2000 generations ago, then increased to NE (10000) 40 generations ago, and remained unchanged until sampling
