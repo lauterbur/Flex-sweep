@@ -44,7 +44,6 @@ def binsMissing(argsDict):
         binsUnfinished=set()
         for stat in ["DIND","hDo","hDs","hf","lf","S","ihs","iSAFE","nsl"]:
                 if not os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/stats/bins/neutral_data_bins.{stat}") or not os.path.getsize(f"{argsDict['outputDir']}/training_data/neutral_data/stats/bins/neutral_data_bins.{stat}") > 0:
-#                        print(f"{argsDict['outputDir']}/training_data/neutral_data/stats/bins/neutral_data_bins.{stat} doesn't exist?")
                         binsUnfinished.add(stat)
         return binsUnfinished
 
@@ -140,13 +139,9 @@ def calculateChromStats(argsDict, simFile):
                                 calcCommandLine=f"calculate_stats/runCalculateNormStats.sh {simFile} {argsDict['locusLength']} {argsDict['rMap']}"
                         else:
                                 calcCommandLine=f"calculate_stats/runCalculateNormStats.sh {simFile} {argsDict['locusLength']}"
-#                                with open(f"{simFile}.statout","w") as out, open(f"{simFile}.err","w") as err:
-#                                        calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=out, stderr=err)
-                        print(calcCommandLine)
                         calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         calcOutput,calcError=calcCommandRun.communicate()
         else:
-                print(f"calculating statistics for {simFile}")
                 if os.path.exists(f"{simFile}.statout"):
                         os.remove(f"{simFile}.statout")
                 if os.path.exists(f"{simFile}.err"):
@@ -155,9 +150,6 @@ def calculateChromStats(argsDict, simFile):
                         calcCommandLine=f"calculate_stats/runCalculateNormStats.sh {simFile} {argsDict['locusLength']} {argsDict['rMap']}"
                 else:
                         calcCommandLine=f"calculate_stats/runCalculateNormStats.sh {simFile} {argsDict['locusLength']}"
-#                        with open(f"{simFile}.statout","w") as out, open(f"{simFile}.err","w") as err:
-#                                calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=out, stderr=err)
-                print(calcCommandLine)
                 calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 calcOutput,calcError=calcCommandRun.communicate()
 
@@ -175,13 +167,9 @@ def calculateCenterStats(argsDict, simFile):
                                 calcCommandLine=f"calculate_stats/runCalculateTrainingStats.sh {simFile} {argsDict['locusLength']} {argsDict['rMap']}"
                         else:
                                 calcCommandLine=f"calculate_stats/runCalculateTrainingStats.sh {simFile} {argsDict['locusLength']}"
-#                                with open(f"{simFile}.statout","w") as out, open(f"{simFile}.err","w") as err:
-#                                        calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=out, stderr=err)
-                        print(calcCommandLine)
                         calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         calcOutput,calcError=calcCommandRun.communicate()
         else:
-                #print(f"calculating statistics for {simFile}")
                 if os.path.exists(f"{simFile}.statout"):
                         os.remove(f"{simFile}.statout")
                 if os.path.exists(f"{simFile}.err"):
@@ -190,9 +178,6 @@ def calculateCenterStats(argsDict, simFile):
                         calcCommandLine=f"calculate_stats/runCalculateTrainingStats.sh {simFile} {argsDict['locusLength']} {argsDict['rMap']}"
                 else:
                         calcCommandLine=f"calculate_stats/runCalculateTrainingStats.sh {simFile} {argsDict['locusLength']}"
-#                        with open(f"{simFile}.statout","w") as out, open(f"{simFile}.err","w") as err:
-#                                calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=out, stderr=err)
-                print(calcCommandLine)
                 calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 calcOutput,calcError=calcCommandRun.communicate()
 
@@ -234,7 +219,6 @@ def calculateWrap(argsDict):
                 checkSims(argsDict, simFile)
 
         if argsDict['continue']:
-                print("continue")
                 os.makedirs(f"{argsDict['outputDir']}/training_data/neutral_data/stats", exist_ok=True)
                 for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
                         os.makedirs(f"{argsDict['outputDir']}/training_data/neutral_data/stats/center_{center}", exist_ok=True)
@@ -405,11 +389,9 @@ def main(commandline):
                 calculateWrap(argsDict) # this has --continue in it
 
                 # normalize statistics
-                print("normalize")
                 normStats(argsDict)
 
                 # make feature vectors
-                print("fv")
                 makeFV(argsDict)
 
         # remove statistics if not --keepStats

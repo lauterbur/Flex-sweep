@@ -13,7 +13,7 @@ do
 	OUTNAME=${SIMBASE}_c${CENTER}
 
 	echo "Rscript --vanilla calculate_stats/convertHapMap.R -m $SIMPATH/$SIMBASE.map -p $SIMPATH/$SIMBASE.hap -o $SIMPATH/$SIMBASE -l ${LOCUS} -c ${CENTER} -w 1000000 -s $START"
-	Rscript --vanilla calculate_stats/convertHapMap.R -m $SIMPATH/$SIMBASE.map -p $SIMPATH/$SIMBASE.hap -o $SIMPATH/$SIMBASE -l ${LOCUS} -c ${CENTER} -w 1000000 -s $START
+	Rscript --vanilla calculate_stats/convertHapMap.R -m $SIMPATH/$SIMBASE.map -p $SIMPATH/$SIMBASE.hap -o $SIMPATH/$SIMBASE -l ${LOCUS} -c ${CENTER} -w 1000000 -s $START || continue
 
         # iSAFE - if it works with iSAFE, good, if not, run SAFE
         echo "calculating iSAFE"

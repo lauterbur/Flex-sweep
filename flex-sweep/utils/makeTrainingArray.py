@@ -168,13 +168,9 @@ def makeSweep(numberSims, configDict, outputDir):
 
 def main(numberSims, configFile, outputDir):
         configDict = parseConfig(configFile)        
-#        if type == "neutral":
         neutral = makeNeutral(numberSims, configDict, outputDir)
-#        elif type == "sweep":
         sweep = makeSweep(numberSims, configDict, outputDir)
         return neutral, sweep, configDict
-#        else:
-#                print(f"Must define type of data to simulate (-t or --type) as either neutral or sweep, you provided {type}.")
 
 if __name__=="__main__":
         # run script directly

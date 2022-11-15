@@ -23,7 +23,6 @@ def readWindow(argsDict, stat, simName, simPath, center):
         if stat in ["DIND","hDo","hDs","hf","lf","S","HAF","H12"]:
                 center = int(argsDict['locusLength']/2) # these statistics always have window calculated from the locus center
                 file=f"{simPath}/stats/{simName}_c{center}.{stat}"
-                print(f"norm {file}")
                 if not os.path.exists(file):
                         print(f"Can't read {file}, does not exist")
                         sys.exit(1)
@@ -64,7 +63,6 @@ def readWindow(argsDict, stat, simName, simPath, center):
                                 values=values.rename(columns={'H12':'stat'})
         elif stat in ["ihs","iSAFE","nsl"]:
                 file=f"{simPath}/stats/center_{center}/{simName}_c{center}.{stat}"
-                print(f"norm {file}")
                 if not os.path.exists(file):
                         print(f"Can't read {file}, does not exist")
                         sys.exit(1)
@@ -101,7 +99,6 @@ def cut(values, center, window):
 
 def normalizeWindow(argsDict, binsDir, values, path, runname, stat, center, window):
         # get expected value (mean) and standard deviation from neutral data
-        #print(f"{binsDir}/neutral_data_bins.{stat}")
         neutral=pd.read_csv(f"{binsDir}/neutral_data_bins.{stat}",index_col='freq_bins')
        # now normalize using those bins values
         values.index=values['freq_bins']
@@ -112,7 +109,6 @@ def normalizeWindow(argsDict, binsDir, values, path, runname, stat, center, wind
                 stdev_col.iloc[pd.Index(stdev_col).get_loc(0)]=1 # when stdev is 0, means no variation, so scaled value -> 0
         except KeyError:
                 pass
-        print(f"normalizing {path}/stats/center_{center}/window_{window}/norm/{runname}_c{center}_w{window}_norm.{stat}")
         if stat in ["HAF","H12"]:
                 values['stat_norm']=values['stat'] # don't normalize HAF and H12
         else:
@@ -121,18 +117,15 @@ def normalizeWindow(argsDict, binsDir, values, path, runname, stat, center, wind
         if stat not in ["HAF","H12"]:
                 cut_values=cut(values, center, window)
                 if os.path.exists(f"{path}/stats/center_{center}/window_{window}/norm/"):
-                        print(f"to csv {path}/stats/center_{center}/window_{window}/norm/{runname}_c{center}_w{window}_norm.{stat}")
                         cut_values.to_csv(f"{path}/stats/center_{center}/window_{window}/norm/{runname}_c{center}_w{window}_norm.{stat}", na_rep="NA")
                 else:
                         print(f"{path}/stats/center_{center}/window_{window}/norm/ doesn't exist?")
         elif stat in ["HAF","H12"]:
                 cut_values=values
-                print(f"to csv {path}/stats/center_{center}/window_{window}/norm/{runname}_c{center}_w{window}_norm.{stat}")
                 cut_values.to_csv(f"{path}/stats/center_{center}/window_{window}/norm/{runname}_c{center}_w{window}_norm.{stat}", na_rep="NA")
         return cut_values
 
 def main(argsDict, binsDir, simFile):
-        print("runNormStats")
         simName = os.path.splitext(os.path.basename(simFile))[0]
         simPath = os.path.dirname(simFile)
         for center in range(argsDict['minCenter'], argsDict['maxCenter'] + argsDict['distCenters'], argsDict['distCenters']):
@@ -141,7 +134,6 @@ def main(argsDict, binsDir, simFile):
                         if values is not None:
                                 binnedValues=bin(values,stat,center)
                                 for window in [50000, 100000, 200000, 500000, 1000000]:
-                                        print("normalizeWindow")
                                         normValues=normalizeWindow(argsDict, binsDir, binnedValues, simPath, simName, stat, center, window)
                         else:
                                 print(f"no {stat} files for center = {center}")
@@ -150,14 +142,5 @@ def main(argsDict, binsDir, simFile):
                                         os.remove(f"{simPath}/stats/{simName}_c{center}.{stat}")
                                 elif stat in ["ihs","iSAFE","nsl"]:
                                         os.remove(f"{simPath}/stats/center_{center}/{simName}_c{center}.{stat}")
-#                for stat in ["DIND","hDo","hDs","hf","lf","S","HAF","H12"]:
-#                        values=readWindow(argsDict, stat, simName, simPath, center)
-#                        if values is not None:
-#                                binnedValues=bin(values,stat,center)
-#                                for window in [50000, 100000, 200000, 500000, 1000000]:
-#                                        normValues=normalizeWindow(argsDict, binsDir, binnedValues, simPath, simName, stat, center, window)
-#                        else:
-#                                print(f"no {stat} files for center = {center}")
-
 if __name__=="__main__":
         main()

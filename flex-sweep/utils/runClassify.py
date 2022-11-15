@@ -20,7 +20,7 @@ from joblib import Parallel, delayed
 session_conf = tf.compat.v1.ConfigProto(
         intra_op_parallelism_threads=1
         )
-sess = tf.compat.v1.Session(graph=tf.compat.v1.get_default_graph(), config=session_conf)
+#sess = tf.compat.v1.Session(graph=tf.compat.v1.get_default_graph(), config=session_conf)
 
 def classifyData(argsDict, window):
         numberStats = 11
@@ -59,7 +59,6 @@ def classifyData(argsDict, window):
                 predictions = 0
         else:
                 predictions = 1
-        print(predictions)
         classDict = {1:'neutral',0:'sweep'}
 
         windowPair = os.path.splitext(os.path.basename(file).split("_")[1])[0]
@@ -74,7 +73,7 @@ def classifyData(argsDict, window):
         return line
 
 def main(argsDict, windows):
-        lines = Parallel(n_jobs=argsDict['numJobs'])(delayed(classifyData)(argsDict, i) for i in windows)
+        lines = Parallel(n_jobs=argsDict['numJobs'], verbose=100, backend="multiprocessing")(delayed(classifyData)(argsDict, i) for i in windows)
 
         outputFile = f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}_classes.txt"
         with open(outputFile, 'a') as out:

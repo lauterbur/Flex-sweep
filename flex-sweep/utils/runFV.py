@@ -16,7 +16,6 @@ def average(path, sim, stat, center, window):
         file = f"{path}/stats/center_{center}/window_{window}/norm/{sim}_c{center}_w{window}_norm.{stat}"
         if not os.path.exists(file):
                 print(f"no {stat} file at center {center} and window size {window} for {sim}")
-                print(file)
         else:
                 try:
                         values=pd.read_csv(file, sep=",", quotechar='"', skipinitialspace=True) # NA values read as NaN
@@ -26,7 +25,6 @@ def average(path, sim, stat, center, window):
                         sys.exit(1)
                 avgStat = values['stat_norm'].mean() # excludes NaN values
                 if pd.isna(avgStat):
-#                        print(f"nan for {stat} at center {center} and window {window} for {sim}")
                         pass
                 return avgStat
 
@@ -36,7 +34,6 @@ def writeFV(fV, path, type):
         fV.to_csv(f"{path}/fvs/{type}.fv", mode='w', header=True, index=False, na_rep="nan")
 
 def fvWrap(argsDict, simFile, type):
-        print(simFile)
         sim = os.path.basename(simFile)
         iter = int(simFile.split("_")[-1])
         path = f"{argsDict['outputDir']}/training_data/{type}_data"
@@ -72,12 +69,11 @@ def fvWrap(argsDict, simFile, type):
                                                 fV.append(float(avgStat))
                                 else:
                                         fV.append(float("nan"))
-#                                        print(f"nan for stat {} center {} window {}, unknown reason, exiting".format(stat,center,window))
         featureFile.loc[iter]=fV
         return featureFile
 
 def parallelFV(argsDict, simFiles, type):
-        featureFile = Parallel(n_jobs=argsDict["numJobs"])(delayed(fvWrap)(argsDict, i, type) for i in simFiles)
+        featureFile = Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(fvWrap)(argsDict, i, type) for i in simFiles)
         return pd.concat(featureFile)
 
 def main(argsDict, simFiles, type):
@@ -102,7 +98,6 @@ def main(argsDict, simFiles, type):
         fullFeatureFile.drop(fullFeatureFile[numNans > 115].index, inplace=True) # dump fvs with more than 10% nans
         print(f"Removing {numDropFV} feature vectors because more than 10% of statistics are nan")
         fullFeatureFile=fullFeatureFile.fillna(0) # replace remaining nans with 0s
-        #print(fullFeatureFile)
         writeFV(fullFeatureFile, argsDict['outputDir'], type)
 
 

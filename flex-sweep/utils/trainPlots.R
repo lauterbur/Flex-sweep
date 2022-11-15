@@ -1,6 +1,10 @@
-library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
 library(yardstick)
 library(viridis)
+library(tibble)
 
 args = commandArgs(trailingOnly=TRUE)
 neutral_preds <- args[1]
@@ -9,11 +13,15 @@ outputDir <- args[3]
 
 ### load data
 neutral_data <- read_tsv(neutral_preds)
+print(neutral_data)
 sweep_data <- read_tsv(sweep_preds)
+print(sweep_data)
 pred_data <- bind_rows(neutral = neutral_data, sweep = sweep_data, .id = "type")
 
 print(neutral_preds)
 ### get true/false counts
+cols <- c(false_positive = 0, true_positive = 0, false_negative = 0, true_negative = 0)
+
 confusion_data <- pred_data %>%
   group_by(type) %>%
   count(predicted_class,.drop=FALSE) %>%
@@ -22,7 +30,8 @@ confusion_data <- pred_data %>%
                                   ifelse(type!=predicted_class & type=="neutral","false_positive","false_negative")))) %>%
   ungroup(type) %>%
   select(-c(type,predicted_class)) %>%
-  spread(true_false,n,fill=0,drop=FALSE) #%>%
+  spread(true_false,n,fill=0,drop=FALSE) %>% 
+  add_column(!!!cols[!names(cols) %in% names(.)])
 
 ## get rates
 rate_data <- confusion_data %>%
@@ -37,6 +46,7 @@ rate_data <- confusion_data %>%
          true_negative=replace_na(true_negative, 0)) %>%
   mutate(accuracy=(true_positive+true_negative)/(true_positive+true_negative+false_positive+false_negative),
          precision=true_positive/(true_positive + false_positive))
+print(rate_data)
 
 ## set up data for ROC
 roc_data <- pred_data %>% 
@@ -82,6 +92,8 @@ ggsave(paste0(outputDir,"/plots/training_ROC.png"), p)
 ### load history data
 history <- paste0(outputDir,"/",outputDir,"Model/",outputDir,"_history.csv")
 history_data <- read_csv(history)
+
+print(history_data)
 
 h <- history_data %>%
   select(loss, val_loss, accuracy, val_accuracy) %>%

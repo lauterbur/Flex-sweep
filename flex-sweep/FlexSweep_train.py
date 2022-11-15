@@ -25,6 +25,7 @@ def parse_arguments(commandline):
         parser.add_argument('--distCenters', type=int, default=10000, help='UNTESTED; distance between center points for statistic calculation, in bp')
         parser.add_argument('--minCenter', type=int, default=500000, help='UNTESTED; minimum center point in locus, in bp')
         parser.add_argument('--maxCenter', type=int, default=700000, help='UNTESTEDmaximum center point in locus, in bp')
+        parser.add_argument('--continue', action='store_true', help='continue with data or model from a previous run')
 
         args = parser.parse_args(commandline)
         argsDict = vars(args)
@@ -57,10 +58,10 @@ def splitFV(argsDict, type):
                         print(f"Feature vector {argsDict['fvLoc']}/{type}_predict.fv does not exist or is empty")
                         sys.exit(1)
         elif not argsDict['fvLoc']:
-                argsDict['fvLoc'] = f"{argsDict['outputDir']}/fvs"
+                fvLoc = f"{argsDict['outputDir']}/fvs"
                 numTrainTest = int(argsDict["fvSplit"][0])
                 allFVs = []
-                with open(f"{argsDict['fvLoc']}/{type}.fv", "r") as fvFile:
+                with open(f"{fvLoc}/{type}.fv", "r") as fvFile:
                         read = csv.reader(fvFile)
                         header = next(read)
                         for row in read:
@@ -101,6 +102,8 @@ def main(commandline):
 
         splitFV(argsDict, "neutral")
         splitFV(argsDict, "sweep")
+        if not argsDict['fvLoc']:
+                argsDict['fvLoc'] = f"{argsDict['outputDir']}/fvs"
         runTrain.main(argsDict)
 
 if __name__=="__main__":

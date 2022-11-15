@@ -1,6 +1,8 @@
 # Flex-sweep
 Versatile tool for detecting selective sweeps with a variety of ages, strengths, starting allele frequencies, and completeness.
 
+Singularity container available at https://zenodo.org/record/7313705#.Y3LQr77ML0p
+
 Creates the following directory structure:
 ~~~
 outputDir
@@ -37,5 +39,7 @@ sweep strengths, sweep ages, swept allele starting frequencies, and swept allele
 based on reasonable estimates that reflect your species.
 
 Choose a demographic model that represents reasonable expectations for your population.
+
+Pre-trained Yoruba and equilibrium models available at: https://zenodo.org/record/7313705#.Y3LQr77ML0p
 
 ### See wiki for full documentation

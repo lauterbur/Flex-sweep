@@ -183,8 +183,6 @@ def trainModel(argsDict):
         
 def testPredict(argsDict, modelPath, type):
         print(f"Running prediction tests with model {argsDict['outputDir']}")
-        # test model by predicting on held back data
-        # restore from tensorflow
         model = tf.keras.models.load_model(modelPath)
         
         METRICS = [
@@ -213,18 +211,14 @@ def testPredict(argsDict, modelPath, type):
         testXDataParams = np.loadtxt(f"{argsDict['fvLoc']}/{type}_predict.fv", skiprows=1, delimiter=',')
         numRows, numCols = testXDataParams.shape
         if type == "neutral" and numCols == 1159:
-                print("predicting neutral")
                 testX = np.delete(testXDataParams, np.s_[0:4], 1) # get rid of first four columns of simulation parameters
                 testXParams = testXDataParams[:,0:4]
         elif type == "neutral" and numCols == 1155:
-                print("predicting neutral")
                 testXParams = False
         elif type == "sweep" and numCols == 1163: # sweep, extra params are iter, SAF, SEL, TIME, EAF, THETA, RHO
-                print("predicting sweep")
                 testX=np.delete(testXDataParams, np.s_[0:8], 1) # get rid of first eight columns of simulation parameters
                 testXParams=testXDataParams[:,0:8]
         elif type == "sweep" and numCols == 1155:
-                print("predicting sweep")
                 testXParams = False
         else:
                 print(f"Predict fv at {argsDict['fvLoc']}/{type}_predict.fv has {numCols} columns, expected 1155 (if no parameters in feature vector), 1159 (neutral) or 1163 (sweep)")
@@ -249,8 +243,8 @@ def testPredict(argsDict, modelPath, type):
         classDict = {1:'neutral',0:'sweep'}
         
         #output the predictions
-        os.makedirs(f"{modelPath}/testPredictions", exist_ok=True)
-        with open(f"{modelPath}/testPredictions/{type}.preds",'w') as outFile:
+        os.makedirs(f"{modelPath}/{argsDict['outputDir']}Predictions", exist_ok=True)
+        with open(f"{modelPath}/{argsDict['outputDir']}Predictions/{type}.preds",'w') as outFile:
                 if numCols == 1155:
                         outFile.write('predicted_class\tprob(sweep)\tprob(neutral)\n')
                         for row in range(0,len(preds)):

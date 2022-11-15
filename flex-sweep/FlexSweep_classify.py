@@ -6,7 +6,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import csv
 import glob
-from multiprocessing import cpu_count
+from multiprocessing import cpu_count, set_start_method
 from joblib import Parallel, delayed
 from utils import runNormStats, runClassFV, runClassify
 
@@ -22,7 +22,7 @@ def parse_arguments(commandline):
         parser.add_argument('--vcf', nargs=1, help='path to .vcf file containing data')
         parser.add_argument('--modelLoc', default=False, help='optional, the path to the directory containing the model data\nif not used, assumes model exists in outputDir/outputDirModel from previous run')
         parser.add_argument('--normLoc', default=False, help='optional, the path to the directory containing the normalization data\nif not used, assumes normalization data exists in outputDir/training_data/neutral/stats/bins from previous run')
-        parser.add_argument('--numJobs', type=int, nargs=1, default=cpu_count(), help='the number of processors available to run the program')
+        parser.add_argument('--numJobs', type=int, default=cpu_count(), help='the number of processors available to run the program')
         parser.add_argument('--distCenters', type=int, default=10000, help='UNTESTED; distance between center points for statistic calculation, in bp')
         parser.add_argument('--minCenter', type=int, default=500000, help='UNTESTED; minimum center point in locus, in bp')
         parser.add_argument('--maxCenter', type=int, default=700000, help='UNTESTEDmaximum center point in locus, in bp')
@@ -61,46 +61,30 @@ def cutHapMap(argsDict):
         cutCommandLine = f"utils/cut_to_1.2Mb.sh {argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows {argsDict['classifyName']} {argsDict['hapmap'][0]} {argsDict['hapmap'][1]} {argsDict['windowStep']}"
         cutCommandRun=subprocess.Popen(cutCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         calcOutput,calcError=cutCommandRun.communicate()
-        print("HAPMAP ERROR")
-        print(calcError)
         # make directory for each window
         with open(windowsFile, "r") as wF:
                 windows = wF.read().splitlines()
         return windows # list of minimum and maximum value for each window
 
-def convertVCF():
-        pass
+#def convertVCF():
+#        pass
 
 def calculateStats(argsDict, windowFile):
-        print("calculateStats")
         windowStart = windowFile.split("_")[1].split("-")[0]
         os.makedirs(f"{windowFile}", exist_ok=True)
         os.makedirs(f"{windowFile}/stats", exist_ok=True)
         for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
                 os.makedirs(f"{windowFile}/stats/center_{center}", exist_ok=True)
         calcCommandLine = f"calculate_stats/runCalculateClassifyStats.sh {windowFile} {argsDict['locusLength']} {windowStart}" 
-        print(calcCommandLine)
         try:
                 calcCommandRun = subprocess.check_output(calcCommandLine.split(), stderr=subprocess.PIPE)
+                calcOutput,calcError = calcCommandRun.communicate()
         except Exception as e:
-                print(e)
-#        calcCommandRun = subprocess.Popen(calcCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#        calcOutput,calcError = calcCommandRun.communicate()
-#        print(calcError)
-
-def testParallel(argsDict, i):
-        print(f"test parallel {i}")
+                return e
 
 def calculateWrap(argsDict, windows):
         print("Calculating statistics in each sliding window")
         windowFiles = [f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{x}" for x in windows]
-#        calculateStats(argsDict, windowFiles[0])
-        print("try parallel")
-        print(f"Parallel(n_jobs={argsDict['numJobs']})(testParallel)(argsDict, i) for i in {windowFiles[0:4]}")
-        Parallel(n_jobs=argsDict["numJobs"])(delayed(testParallel)(argsDict, i) for i in windowFiles[0:4])
-        print(f"Parallel(n_jobs={argsDict['numJobs']})(delayed(calculateStats)(argsDict, i) for i in {windowFiles[0:4]}")
-        Parallel(n_jobs=argsDict["numJobs"])(delayed(calculateStats)(argsDict, i) for i in windowFiles[0:4])
-        print("after parallel")
 
 def normStats(argsDict, windows):
         print(f"Normalizing statistics from data at {argsDict['normLoc']}")
@@ -113,33 +97,27 @@ def normStats(argsDict, windows):
         for windowDir in windowDirs:
                 for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
                         for window in [50000, 100000, 200000, 500000, 1000000]:
-                                print(f"{windowDir}/stats/center_{center}/window_{window}")
                                 os.makedirs(f"{windowDir}/stats/center_{center}/window_{window}", exist_ok=True)
                                 os.makedirs(f"{windowDir}/stats/center_{center}/window_{window}/norm", exist_ok=True)
-        print("start parallel norm")
-        Parallel(n_jobs=argsDict["numJobs"])(delayed(runNormStats.main)(argsDict, argsDict['normLoc'], i) for i in windowFiles)
+        Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(runNormStats.main)(argsDict, argsDict['normLoc'], i) for i in windowFiles)
 
 def wrapFV(argsDict, windows):
         print("Creating feature vectors")
+        os.makedirs(f"{argsDict['outputDir']}/classification/fvs", exist_ok=True)
         windowFiles = [f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{x}" for x in windows]
-        Parallel(n_jobs=argsDict["numJobs"])(delayed(runClassFV.main)(argsDict, i) for i in windowFiles)
+        Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(runClassFV.main)(argsDict, i) for i in windowFiles)
 
 def classify(argsDict, windows):
-        print("classifying")
         runWindows = []
         for window in windows:
                 if os.path.exists(f"{argsDict['outputDir']}/classification/fvs/{argsDict['classifyName']}_{window}.fv") and os.path.getsize(f"{argsDict['outputDir']}/classification/fvs/{argsDict['classifyName']}_{window}.fv") > 0:
-                        print(f"{argsDict['outputDir']}/classification/fvs/{argsDict['classifyName']}_{window}.fv")
                         runWindows.append(window)                
         else:
                 print(f"{argsDict['outputDir']}/classification/fvs/{argsDict['classifyName']}_{window}.fv doesn't exist")
-        print("runwindows")
         runClassify.main(argsDict, runWindows)
 
 def classifyWrap(argsDict, windows):
         outputFile = f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}_classes.txt"
-#        print(outputFile)
-#        print(windows)
         if os.path.exists(outputFile):
                 os.remove(outputFile)
         classify(argsDict, windows)
@@ -169,6 +147,7 @@ def onlyClassify(argsDict, featureVecs):
         runClassify.main(argsDict, runVecs)
 
 def main(commandline):
+#        multiprocessing.set_start_method('forkserver')
         argsDict = parse_arguments(commandline)
         print("running with arguments:")
         print(argsDict)
@@ -213,7 +192,6 @@ def main(commandline):
         if argsDict['classifyOnly']:
                 featureVecs = argsDict['classifyOnly']
                 featureVecs = glob.glob(f"{featureVecs}/*")
-                print(f"{argsDict['outputDir']}/classification/fvs")
                 onlyClassify(argsDict, featureVecs)
                 print("Classification complete")
                 sys.exit(0)  
@@ -221,9 +199,7 @@ def main(commandline):
         elif argsDict['continue']:
                 windowsFile = f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/classification_windows.txt"
                 # check for existing windows
-                print("continue")
                 if os.path.exists(windowsFile) and os.path.getsize(windowsFile) > 0:
-                        print("missing hapmap?")
                         with open(windowsFile, "r") as wF:
                                 windows = wF.read().splitlines()        
                         # check for missing hap and map files
@@ -231,8 +207,6 @@ def main(commandline):
                         for window in windows:
                                 if os.path.exists(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.hap") and os.path.getsize(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.hap") > 0 and \
                                   os.path.exists(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.map") and os.path.getsize(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.map") > 0:
-                                        print(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.hap exists")
-                                        print(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.map exists")
                                         missingHapMap = False
                                 else:
                                         missingHapMap = True
@@ -242,57 +216,51 @@ def main(commandline):
         
                         # check for missing stats
                         missingStats = []
-                        print("missing stats?")
                         for window in windows:
                                 break_flag = False
-                                for stat in ["ihs","iSAFE","nsl"]:
-                                        for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
-                                                file = f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}/stats/center_{center}/{argsDict['classifyName']}_{window}_c{center}.{stat}"
+                                if os.path.exists(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.hap") and os.path.getsize(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.hap") > 0 and \
+                                  os.path.exists(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.map") and os.path.getsize(f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}.map") > 0:
+                                        for stat in ["ihs","iSAFE","nsl"]:
+                                                for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
+                                                        file = f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}/stats/center_{center}/{argsDict['classifyName']}_{window}_c{center}.{stat}"
+                                                        if os.path.exists(file) and os.path.getsize(file) > 0:
+                                                                pass
+                                                        else:
+                                                                missingStats.append(window)
+                                                                break_flag = True
+                                                                break
+                                                if break_flag:
+                                                        break_flag = False
+                                                        break
+                                        for stat in ["DIND","hDo","hDs","hf","lf","S"]:
+                                                file = f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}/stats/{argsDict['classifyName']}_{window}_c1000000.{stat}"
                                                 if os.path.exists(file) and os.path.getsize(file) > 0:
                                                         pass
                                                 else:
-                                                        print(f"{file} missing")
                                                         missingStats.append(window)
                                                         break_flag = True
-                                                        break
+                                                        break        
                                         if break_flag:
                                                 break_flag = False
                                                 break
-                                for stat in ["DIND","hDo","hDs","hf","lf","S"]:
-                                        file = f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{window}/stats/{argsDict['classifyName']}_{window}_c600000.{stat}"
-                                        if os.path.exists(file) and os.path.getsize(file) > 0:
-                                                pass
-                                        else:
-                                                print(f"{file} missing")
-                                                missingStats.append(window)
-                                                break_flag = True
-                                                break        
-                        print(missingStats)
                         if missingStats:
                                 print("Calculating missing statistics")
                                 missingStats = set(missingStats)
-                                print("calculateWrap")
                                 calculateWrap(argsDict, missingStats)
-                                print("normStats")
                                 normStats(argsDict, windows)
-                                print("wrapFV")
                                 wrapFV(argsDict, windows)
-                                print("classify")
                                 classifyWrap(argsDict, windows)
                         # check for missing feature vectors
                         else:
-                                print("missing FVs?")
                                 missingFVs = []
                                 for window in windows:
                                         if not os.path.exists(f"{argsDict['outputDir']}/classification/fvs/{argsDict['classifyName']}_{window}.fv") or os.path.getsize(f"{argsDict['outputDir']}/classification/fvs/{argsDict['classifyName']}_{window}.fv") < 0:
-                                                #print(f"{argsDict['outputDir']}/classification/fvs/{argsDict['classifyName']}_{window}.fv")
                                                 missingFVs.append(window)
                                 if missingFVs:
                                         normStats(argsDict, windows)
                                         wrapFV(argsDict, windows)
                                         classifyWrap(argsDict, windows)
                                 else:
-                                        print("no")
                                         classifyWrap(argsDict, windows)
                                 
                 else:
@@ -302,11 +270,8 @@ def main(commandline):
                                 convertVCF(argsDict)
                         windows = cutHapMap(argsDict)
                         calculateWrap(argsDict, windows)
-                        print("else norm")
                         normStats(argsDict, windows)
-                        print("else wrap")
                         wrapFV(argsDict, windows)
-                        print("else classify")
                         classifyWrap(argsDict, windows)
         
         else:
