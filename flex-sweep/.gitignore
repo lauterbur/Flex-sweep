@@ -6,3 +6,6 @@ __pycache__
 test/
 fullTest/
 sifTest/
+*slurm
+pipelineTest/
+test.*ap

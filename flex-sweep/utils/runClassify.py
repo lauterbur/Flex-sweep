@@ -59,7 +59,6 @@ def classifyData(argsDict, window):
                 predictions = 0
         else:
                 predictions = 1
-        print(predictions)
         classDict = {1:'neutral',0:'sweep'}
 
         windowPair = os.path.splitext(os.path.basename(file).split("_")[1])[0]

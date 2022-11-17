@@ -6,7 +6,6 @@ def runNeutral(NE, MU, RHO, CHROMS, LOCUS, outFile):
         THETA = 4 * LOCUS * NE * MU
         R = 4 * LOCUS * NE * RHO
         discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R}"
-        #print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 

@@ -44,7 +44,6 @@ def binsMissing(argsDict):
         binsUnfinished=set()
         for stat in ["DIND","hDo","hDs","hf","lf","S","ihs","iSAFE","nsl"]:
                 if not os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/stats/bins/neutral_data_bins.{stat}") or not os.path.getsize(f"{argsDict['outputDir']}/training_data/neutral_data/stats/bins/neutral_data_bins.{stat}") > 0:
-#                        print(f"{argsDict['outputDir']}/training_data/neutral_data/stats/bins/neutral_data_bins.{stat} doesn't exist?")
                         binsUnfinished.add(stat)
         return binsUnfinished
 
@@ -140,13 +139,9 @@ def calculateChromStats(argsDict, simFile):
                                 calcCommandLine=f"calculate_stats/runCalculateNormStats.sh {simFile} {argsDict['locusLength']} {argsDict['rMap']}"
                         else:
                                 calcCommandLine=f"calculate_stats/runCalculateNormStats.sh {simFile} {argsDict['locusLength']}"
-#                                with open(f"{simFile}.statout","w") as out, open(f"{simFile}.err","w") as err:
-#                                        calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=out, stderr=err)
-                        print(calcCommandLine)
                         calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         calcOutput,calcError=calcCommandRun.communicate()
         else:
-                print(f"calculating statistics for {simFile}")
                 if os.path.exists(f"{simFile}.statout"):
                         os.remove(f"{simFile}.statout")
                 if os.path.exists(f"{simFile}.err"):
@@ -155,9 +150,6 @@ def calculateChromStats(argsDict, simFile):
                         calcCommandLine=f"calculate_stats/runCalculateNormStats.sh {simFile} {argsDict['locusLength']} {argsDict['rMap']}"
                 else:
                         calcCommandLine=f"calculate_stats/runCalculateNormStats.sh {simFile} {argsDict['locusLength']}"
-#                        with open(f"{simFile}.statout","w") as out, open(f"{simFile}.err","w") as err:
-#                                calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=out, stderr=err)
-                print(calcCommandLine)
                 calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 calcOutput,calcError=calcCommandRun.communicate()
 
@@ -175,13 +167,9 @@ def calculateCenterStats(argsDict, simFile):
                                 calcCommandLine=f"calculate_stats/runCalculateTrainingStats.sh {simFile} {argsDict['locusLength']} {argsDict['rMap']}"
                         else:
                                 calcCommandLine=f"calculate_stats/runCalculateTrainingStats.sh {simFile} {argsDict['locusLength']}"
-#                                with open(f"{simFile}.statout","w") as out, open(f"{simFile}.err","w") as err:
-#                                        calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=out, stderr=err)
-                        print(calcCommandLine)
                         calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         calcOutput,calcError=calcCommandRun.communicate()
         else:
-                #print(f"calculating statistics for {simFile}")
                 if os.path.exists(f"{simFile}.statout"):
                         os.remove(f"{simFile}.statout")
                 if os.path.exists(f"{simFile}.err"):
@@ -190,9 +178,6 @@ def calculateCenterStats(argsDict, simFile):
                         calcCommandLine=f"calculate_stats/runCalculateTrainingStats.sh {simFile} {argsDict['locusLength']} {argsDict['rMap']}"
                 else:
                         calcCommandLine=f"calculate_stats/runCalculateTrainingStats.sh {simFile} {argsDict['locusLength']}"
-#                        with open(f"{simFile}.statout","w") as out, open(f"{simFile}.err","w") as err:
-#                                calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=out, stderr=err)
-                print(calcCommandLine)
                 calcCommandRun=subprocess.Popen(calcCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 calcOutput,calcError=calcCommandRun.communicate()
 
@@ -241,7 +226,6 @@ def calculateWrap(argsDict):
                 print("Checking for any unfinished chromosome-wide neutral statistics because of the --continue flag, this may take a while")
                 chromNeutralStatsUnfinished = chromAllStatsMissing(argsDict, neutralSims)
                 if chromNeutralStatsUnfinished:
-#                        print(f"Calculating missing statistics {chromNeutralStatsUnfinished}")
                         print(f"Calculating missing chromosome-wide neutral statistics")
                         chromNeutralStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in chromNeutralStatsUnfinished]
                         chromNeutralStatsUnfinishedSims = set([f"{'_'.join(str.split(x,'_')[0:-1])}.out".replace("stats/","") for x in chromNeutralStatsUnfinishedPartial])
@@ -256,7 +240,6 @@ def calculateWrap(argsDict):
                 print("Checking for any unfinished sliding center neutral statistics because of the --continue flag, this may take a while")
                 centerNeutralStatsUnfinished = centerAllStatsMissing(argsDict, neutralSims)
                 if centerNeutralStatsUnfinished:
-#                        print(f"Calculating missing statistics {centerNeutralStatsUnfinished}")
                         print(f"Calculating missing sliding center neutral statistics")
                         centerNeutralStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in centerNeutralStatsUnfinished]
                         centerNeutralStatsUnfinishedSims = [f"{'_'.join(str.split(x,'_')[0:-1])}.out" for x in centerNeutralStatsUnfinishedPartial]
@@ -289,7 +272,6 @@ def calculateWrap(argsDict):
 
                 # check for unfinished sweep stats
                 if sweepStatsUnfinished:
-#                        print(f"Calculating missing statistics {sweepStatsUnfinished}")
                         print(f"Calculating missing sweep statistics")
                         Parallel(n_jobs=argsDict["numJobs"])(delayed(calculateCenterStats)(argsDict, i) for i in sweepStatsUnfinished)
                 if not argsDict['keepSims']:
@@ -405,11 +387,9 @@ def main(commandline):
                 calculateWrap(argsDict) # this has --continue in it
 
                 # normalize statistics
-                print("normalize")
                 normStats(argsDict)
 
                 # make feature vectors
-                print("fv")
                 makeFV(argsDict)
 
         # remove statistics if not --keepStats

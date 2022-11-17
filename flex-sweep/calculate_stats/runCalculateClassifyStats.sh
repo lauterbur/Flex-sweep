@@ -12,7 +12,6 @@ for CENTER in `seq 500000 10000 700000`
 do
 	OUTNAME=${SIMBASE}_c${CENTER}
 
-	echo "Rscript --vanilla calculate_stats/convertHapMap.R -m $SIMPATH/$SIMBASE.map -p $SIMPATH/$SIMBASE.hap -o $SIMPATH/$SIMBASE -l ${LOCUS} -c ${CENTER} -w 1000000 -s $START"
 	Rscript --vanilla calculate_stats/convertHapMap.R -m $SIMPATH/$SIMBASE.map -p $SIMPATH/$SIMBASE.hap -o $SIMPATH/$SIMBASE -l ${LOCUS} -c ${CENTER} -w 1000000 -s $START
 
         # iSAFE - if it works with iSAFE, good, if not, run SAFE
@@ -41,7 +40,6 @@ do
 
 	# nSL
         # using scikit-allel
-        echo "python3.6 calculate_stats/nsl_classify.py ${SIMPATH}/${SIMBASE}/${OUTNAME}.hap ${SIMPATH}/${SIMBASE}/${OUTNAME}.map ${SIMPATH}/${SIMBASE}/stats/center_${CENTER}/${OUTNAME}.nsl"
         python3.6 calculate_stats/nsl_classify.py ${SIMPATH}/${SIMBASE}/${OUTNAME}.hap ${SIMPATH}/${SIMBASE}/${OUTNAME}.map ${SIMPATH}/${SIMBASE}/stats/center_${CENTER}/${OUTNAME}.nsl
 	# iHS
 	### outputs both standardized and unstandardize scores - default standardization is 2% bins - use undstandardized, will standardize later

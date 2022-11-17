@@ -70,7 +70,6 @@ def simulateWrap(argsDict):
                 neutralUnfinished=[]
                 sweepUnfinished=[]
                 for run in range(1,argsDict["numberSims"]+1):
-                      #  print("checking "+str(run))
                         # check if there are missing neutral and sweep simulations
                         neutralCount=0
                         sweepCount=0

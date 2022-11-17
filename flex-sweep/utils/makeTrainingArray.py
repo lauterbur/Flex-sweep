@@ -69,11 +69,11 @@ def parseConfig(configFile):
                                 if dist == "fixed" or dist == "exponential":
                                         if len(configDict[param]) > 1:
                                                 print(f"You have specified a {dist} distribution for {param} but specified more than one value: {param_val}, please modify config file appropriately")
-                                                sys.exit()
+                                                sys.exit(1)
                                 elif dist == "uniform" or dist == "normal":
                                         if len(configDict[param]) != 2:
                                                 print(f"You have specified a {dist} distribution for {param} but specified more than one value: {param_val}, please modify config file appropriately")
-                                                sys.exit()
+                                                sys.exit(1)
         else:
                 print(f"One or more parameters are not defined, please double check {configFile}. You provided: {configDict}")
                 sys.exit(1)
@@ -168,13 +168,9 @@ def makeSweep(numberSims, configDict, outputDir):
 
 def main(numberSims, configFile, outputDir):
         configDict = parseConfig(configFile)        
-#        if type == "neutral":
         neutral = makeNeutral(numberSims, configDict, outputDir)
-#        elif type == "sweep":
         sweep = makeSweep(numberSims, configDict, outputDir)
         return neutral, sweep, configDict
-#        else:
-#                print(f"Must define type of data to simulate (-t or --type) as either neutral or sweep, you provided {type}.")
 
 if __name__=="__main__":
         # run script directly

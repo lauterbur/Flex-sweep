@@ -75,7 +75,7 @@ def splitFV(argsDict, type):
                                 print(f"You only have one {type} feature vector for generating accuracy data, this is not enough!")
                                 sys.exit(1)
                         elif len(allFVs) < 32:
-                                print(f"You must have at least 32 {type} feature vectors, you only have {len(allFVs)}")
+                                print(f"You must have at least 32 {type} feature vectors, you only have {numPred}")
                                 sys.exit(1)
                 trainFVs = [header] + allFVs[0:numTrainTest]
                 predFVs = [header] + allFVs[-numPred:]
