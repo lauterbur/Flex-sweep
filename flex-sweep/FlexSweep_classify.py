@@ -108,7 +108,6 @@ def classify(argsDict, windows):
         for window in windows:
                 if os.path.exists(f"{argsDict['outputDir']}/classification/fvs/{argsDict['classifyName']}_{window}.fv") and os.path.getsize(f"{argsDict['outputDir']}/classification/fvs/{argsDict['classifyName']}_{window}.fv") > 0:
                         runWindows.append(window)                
-        else:
         runClassify.main(argsDict, runWindows)
 
 def classifyWrap(argsDict, windows):
