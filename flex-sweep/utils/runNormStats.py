@@ -24,8 +24,8 @@ def readWindow(argsDict, stat, simName, simPath, center):
                 center = int(argsDict['locusLength']/2) # these statistics always have window calculated from the locus center
                 file=f"{simPath}/stats/{simName}_c{center}.{stat}"
                 if not os.path.exists(file):
-                        print(f"Can't read {file}, does not exist")
-                        sys.exit(1)
+                        print(f"Normalizing: Can't read {file}, does not exist")
+#                        sys.exit(1)
                 else:
                         if stat == "DIND":
                                 values=pd.read_csv(file, sep=' ', names=["position","DIND","DAF"], skiprows=1, engine='python') # read file, these have headers to replace
@@ -64,8 +64,8 @@ def readWindow(argsDict, stat, simName, simPath, center):
         elif stat in ["ihs","iSAFE","nsl"]:
                 file=f"{simPath}/stats/center_{center}/{simName}_c{center}.{stat}"
                 if not os.path.exists(file):
-                        print(f"Can't read {file}, does not exist")
-                        sys.exit(1)
+                        print(f"Normalizing: Can't read {file}, does not exist")
+#                        sys.exit(1)
                 else:
                         if stat == "ihs":
                                 values=pd.read_csv(file, sep='\s', names=["position","index","DAF","iHH_0","iHH_1","iHS","standardized_iHS"], skiprows=1, engine='python') # read ihs file, these have headers to replace
@@ -86,7 +86,7 @@ def bin(values, stat, center, freq=.02):
         try:
                 values['freq_bins'] = pd.cut(x=values['DAF'], bins=np.arange(0,1+freq,freq), include_lowest=True, precision=2) #, labels=np.arange(0,1,freq))
         except:
-                print(f"Values for {stat} at center {center} do not exist")
+                print(f"Normalization bin values for {stat} at center {center} do not exist")
                 sys.exit(1)
         return values
 
