@@ -81,7 +81,7 @@ def calculateStats(argsDict, windowFile):
 def calculateWrap(argsDict, windows):
         print("Calculating statistics in each sliding window")
         windowFiles = [f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{x}" for x in windows]
-        Parallel(n_jobs=argsDict["numJobs"])(delayed(calculateStats)(argsDict, i) for i in windowFiles[0:4])
+        Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(calculateStats)(argsDict, i) for i in windowFiles[0:4])
 
 def normStats(argsDict, windows):
         print(f"Normalizing statistics from data at {argsDict['normLoc']}")
@@ -96,12 +96,12 @@ def normStats(argsDict, windows):
                         for window in [50000, 100000, 200000, 500000, 1000000]:
                                 os.makedirs(f"{windowDir}/stats/center_{center}/window_{window}", exist_ok=True)
                                 os.makedirs(f"{windowDir}/stats/center_{center}/window_{window}/norm", exist_ok=True)
-        Parallel(n_jobs=argsDict["numJobs"])(delayed(runNormStats.main)(argsDict, argsDict['normLoc'], i) for i in windowFiles)
+        Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(runNormStats.main)(argsDict, argsDict['normLoc'], i) for i in windowFiles)
 
 def wrapFV(argsDict, windows):
         print("Creating feature vectors")
         windowFiles = [f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{x}" for x in windows]
-        Parallel(n_jobs=argsDict["numJobs"])(delayed(runClassFV.main)(argsDict, i) for i in windowFiles)
+        Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(runClassFV.main)(argsDict, i) for i in windowFiles)
 
 def classify(argsDict, windows):
         runWindows = []

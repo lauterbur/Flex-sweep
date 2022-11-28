@@ -9,4 +9,4 @@ sifTest/
 *slurm
 pipelineTest/
 test.*ap
-*sh
+flex-sweep/run_FlexSweep.sh
