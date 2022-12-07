@@ -73,7 +73,7 @@ def classifyData(argsDict, window):
         return line
 
 def main(argsDict, windows):
-        lines = Parallel(n_jobs=argsDict['numJobs'])(delayed(classifyData)(argsDict, i) for i in windows)
+        lines = Parallel(n_jobs=int(argsDict['numJobs']/8))(delayed(classifyData)(argsDict, i) for i in windows)
 
         outputFile = f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}_classes.txt"
         with open(outputFile, 'a') as out:

@@ -128,19 +128,22 @@ def normalizeWindow(argsDict, binsDir, values, path, runname, stat, center, wind
 def main(argsDict, binsDir, simFile):
         simName = os.path.splitext(os.path.basename(simFile))[0]
         simPath = os.path.dirname(simFile)
-        for center in range(argsDict['minCenter'], argsDict['maxCenter'] + argsDict['distCenters'], argsDict['distCenters']):
-                for stat in ["ihs","iSAFE","nsl", "DIND","hDo","hDs","hf","lf","S","HAF","H12"]:
-                        values = readWindow(argsDict, stat, simName, simPath, center)
-                        if values is not None:
-                                binnedValues=bin(values,stat,center)
-                                for window in [50000, 100000, 200000, 500000, 1000000]:
-                                        normValues=normalizeWindow(argsDict, binsDir, binnedValues, simPath, simName, stat, center, window)
-                        else:
-                                print(f"no {stat} files for center = {center}")
-                        if not argsDict['keepStats']:
-                                if stat in ["DIND","hDo","hDs","hf","lf","S","HAF","H12"]:
-                                        os.remove(f"{simPath}/stats/{simName}_c{center}.{stat}")
-                                elif stat in ["ihs","iSAFE","nsl"]:
-                                        os.remove(f"{simPath}/stats/center_{center}/{simName}_c{center}.{stat}")
+        try:
+                for center in range(argsDict['minCenter'], argsDict['maxCenter'] + argsDict['distCenters'], argsDict['distCenters']):
+                        for stat in ["ihs","iSAFE","nsl", "DIND","hDo","hDs","hf","lf","S","HAF","H12"]:
+                                values = readWindow(argsDict, stat, simName, simPath, center)
+                                if values is not None:
+                                        binnedValues=bin(values,stat,center)
+                                        for window in [50000, 100000, 200000, 500000, 1000000]:
+                                                normValues=normalizeWindow(argsDict, binsDir, binnedValues, simPath, simName, stat, center, window)
+                                else:
+                                        print(f"no {stat} files for center = {center}")
+                                if not argsDict['keepStats']:
+                                        if stat in ["DIND","hDo","hDs","hf","lf","S","HAF","H12"]:
+                                                os.remove(f"{simPath}/stats/{simName}_c{center}.{stat}")
+                                        elif stat in ["ihs","iSAFE","nsl"]:
+                                                os.remove(f"{simPath}/stats/center_{center}/{simName}_c{center}.{stat}")
+        except:
+                pass
 if __name__=="__main__":
         main()
