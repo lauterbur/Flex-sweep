@@ -1,6 +1,6 @@
 #!/bin/python3
 
-import sys, os, warnings, subprocess, shutil
+import sys, os, warnings, subprocess, shutil, psutil
 os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -96,10 +96,18 @@ def normStats(argsDict, windows):
                         for window in [50000, 100000, 200000, 500000, 1000000]:
                                 os.makedirs(f"{windowDir}/stats/center_{center}/window_{window}", exist_ok=True)
                                 os.makedirs(f"{windowDir}/stats/center_{center}/window_{window}/norm", exist_ok=True)
-        Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(runNormStats.main)(argsDict, argsDict['normLoc'], i) for i in windowFiles)
+        current_process = psutil.Process()
+        subproc_before = set([p.pid for p in current_process.children(recursive=True)])
+        grouped_data = Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(runNormStats.main)(argsDict, argsDict['normLoc'], i) for i in windowFiles)
+       # subproc_after = set([p.pid for p in current_process.children(recursive=True)])
+       # for subproc in subproc_after - subproc_before:
+       #         print('Killing process with pid {}'.format(subproc))
+       #         psutil.Process(subproc).terminate()
+        print(f"Finished normalizing statistics from data at {argsDict['normLoc']}")
 
 def wrapFV(argsDict, windows):
         print("Creating feature vectors")
+        os.makedirs(f"{argsDict['outputDir']}/classification/fvs/", exist_ok=True)
         windowFiles = [f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{x}" for x in windows]
         Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(runClassFV.main)(argsDict, i) for i in windowFiles)
 

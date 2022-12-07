@@ -21,7 +21,7 @@ def average(windowDir, stat, center, window):
         normFile = f"{windowDir}/stats/center_{center}/window_{window}/norm/{classWindow}_c{center}_w{window}_norm.{stat}"
         try:
                 values = pd.read_csv(normFile, sep=",", quotechar='"', skipinitialspace=True) # NA values read as NaN
-        except pd.errors.EmptyDataError:
+        except (FileNotFoundError,pd.errors.EmptyDataError):
                 values=pd.DataFrame([["NaN","NaN","NaN","NaN","NaN"]],columns=["freq_bins","position","stat","DAF","stat_norm"])
         avg_stat=values['stat_norm'].mean() # excludes NaN values
         return avg_stat
