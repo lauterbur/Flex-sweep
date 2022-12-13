@@ -43,7 +43,7 @@ def trainingArray(argsDict):
                 if os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/array_neutral.txt") and os.path.getsize(f"{argsDict['outputDir']}/training_data/neutral_data/array_neutral.txt") > 0:
                         neutral = open(f"{argsDict['outputDir']}/training_data/neutral_data/array_neutral.txt", "r")
                 else:
-                        configDict = makeTraininArray.parseConfig(configFile)
+                        configDict = makeTrainingArray.parseConfig(configFile)
                         neutral = makeTrainingArray.makeNeutral(numberSims, configDict, outputDir)
                 if os.path.exists(f"{argsDict['outputDir']}/training_data/sweep_data/array_sweep.txt") and os.path.getsize(f"{argsDict['outputDir']}/training_data/sweep_data/array_sweep.txt") > 0:
                         configDict = makeTrainingArray.parseConfig(configFile)
