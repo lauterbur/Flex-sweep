@@ -5,15 +5,18 @@ import sys
 def runNeutral(NE, MU, RHO, CHROMS, LOCUS, outFile):
         THETA = 4 * LOCUS * NE * MU
         R = 4 * LOCUS * NE * RHO
-        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R}"
+        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA:.20} -r {R:.20}"
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
 def runNeutralDemog(NE, MU, RHO, CHROMS, CHANGETIME, CHANGESIZE, LOCUS, outFile):
         THETA = 4 * LOCUS * NE * MU
         R = 4 * LOCUS * NE * RHO
-        CT_SCALED = CHANGETIME / (4 * NE)
-        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -en {CT_SCALED} 0 {CHANGESIZE}"
+        CT_SCALED = [float(x) / (4 * NE) for x in CHANGETIME]
+#        EN = " ".join([" ".join(["-en",f'{x:.20f}',"0",y]) for x, y in zip(CT_SCALED, CHANGESIZE)])
+        EN = " ".join([" ".join(["-en",f'{x:.20f}',"0",y]) for x, y in zip(CT_SCALED, CHANGESIZE)])
+        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA:.20} -r {R:.20} {EN}"
+        print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
@@ -23,6 +26,7 @@ def runCompleteHardSweep(NE, MU, RHO, SEL, TIME, CHROMS, LOCUS, outFile):
         S = SEL * 2 * NE
         SELTIME = TIME / (4 * NE)
         discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5"
+        print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
@@ -32,6 +36,7 @@ def runIncompleteHardSweep(NE, MU, RHO, SEL, TIME, EAF, CHROMS, LOCUS, outFile):
         S = SEL * 2 * NE
         SELTIME = TIME / (4 * NE)
         discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -c {EAF}"
+        print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
@@ -41,6 +46,7 @@ def runCompleteSoftSweep(NE, MU, RHO, SEL, TIME, SAF, CHROMS, LOCUS, outFile):
         S = SEL * 2 * NE
         SELTIME = TIME / (4 * NE)
         discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -f {SAF}"
+        print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
@@ -50,6 +56,7 @@ def runIncompleteSoftSweep(NE, MU, RHO, SEL, TIME, SAF, EAF, CHROMS, LOCUS, outF
         S = SEL * 2 * NE
         SELTIME = TIME / (4 * NE)
         discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -f {SAF} -c {EAF}"
+        print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
@@ -57,12 +64,15 @@ def runCompleteHardSweepDemog(NE, MU, RHO, SEL, TIME, CHROMS, CHANGETIME, CHANGE
         THETA = 4 * LOCUS * NE * MU
         R = 4 * LOCUS * NE * RHO
         CT_SCALED = [float(x) / (4 * NE) for x in CHANGETIME]
+        EN = " ".join([" ".join(["-en",f'{x:.20f}',"0",y]) for x, y in zip(CT_SCALED, CHANGESIZE)])
         timesize = ""
         for i in range(len(CHANGETIME)):
                 timesize = f"{timesize}-en {CT_SCALED[i]} 0 {CHANGESIZE[i]} "
         S = SEL * 2 * NE
         SELTIME = TIME / (4 * NE)
-        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 {timesize}"
+#        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 {timesize}"
+        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 {EN}"
+        print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
@@ -70,12 +80,15 @@ def runIncompleteHardSweepDemog(NE, MU, RHO, SEL, TIME, EAF, CHROMS, CHANGETIME,
         THETA = 4 * LOCUS * NE * MU
         R = 4 * LOCUS * NE * RHO
         CT_SCALED = [float(x) / (4 * NE) for x in CHANGETIME]
+        EN = " ".join([" ".join(["-en",f'{x:.20f}',"0",y]) for x, y in zip(CT_SCALED, CHANGESIZE)])
         timesize = ""
         for i in range(len(CHANGETIME)):
                 timesize = f"{timesize}-en {CT_SCALED[i]} 0 {CHANGESIZE[i]} "
         S = SEL * 2 * NE
         SELTIME = TIME / (4 * NE)
-        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -c {EAF} {timesize}"
+#        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -c {EAF} {timesize}"
+        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -c {EAF} {EN}"
+        print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
@@ -83,12 +96,15 @@ def runCompleteSoftSweepDemog(NE, MU, RHO, SEL, TIME, SAF, CHROMS, CHANGETIME, C
         THETA = 4 * LOCUS * NE * MU
         R = 4 * LOCUS * NE * RHO
         CT_SCALED = [float(x) / (4 * NE) for x in CHANGETIME]
+        EN = " ".join([" ".join(["-en",f'{x:.20f}',"0",y]) for x, y in zip(CT_SCALED, CHANGESIZE)])
         timesize = ""
         for i in range(len(CHANGETIME)):
                 timesize = f"{timesize}-en {CT_SCALED[i]} 0 {CHANGESIZE[i]} "
         S = SEL * 2 * NE
         SELTIME = TIME / (4 * NE)
-        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -f {SAF} {timesize}"
+#        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -f {SAF} {timesize}"
+        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -f {SAF} {EN}"
+        print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
@@ -96,12 +112,15 @@ def runIncompleteSoftSweepDemog(NE, MU, RHO, SEL, TIME, SAF, EAF, CHROMS, CHANGE
         THETA = 4 * LOCUS * NE * MU
         R = 4 * LOCUS * NE * RHO
         CT_SCALED = [float(x) / (4 * NE) for x in CHANGETIME]
+        EN = " ".join([" ".join(["-en",f'{x:.20f}',"0",y]) for x, y in zip(CT_SCALED, CHANGESIZE)])
         timesize = ""
         for i in range(len(CHANGETIME)):
                 timesize = f"{timesize}-en {CT_SCALED[i]} 0 {CHANGESIZE[i]} "
         S = SEL * 2 * NE
         SELTIME = TIME / (4 * NE)
-        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -f {SAF} -c {EAF} {timesize}"
+#        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -f {SAF} -c {EAF} {timesize}"
+        discoal = f"/discoal/discoal {CHROMS} 1 {LOCUS} -t {THETA} -r {R} -ws {SELTIME} -a {S} -x 0.5 -f {SAF} -c {EAF} {EN}"
+        print(discoal)
         with open(outFile, "w") as outfile:
                 subprocess.run(discoal.split(), stdout=outfile, stderr=subprocess.PIPE)
 
@@ -110,7 +129,6 @@ def main(runDict, outputDir, type, run, CHROMS, LOCUS):
         MU = runDict["MU"]
         RHO = runDict["RHO"]
         outFile = f"{outputDir}/training_data/{type}_data/{type}_data_{run}.out"
-
         if type == "neutral":
                 if "CHANGETIME" in runDict and "CHANGESIZE" in runDict:
                         CHANGETIME = runDict["CHANGETIME"]

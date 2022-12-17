@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import random
 import os
+from scipy import stats
 
 def parseConfig(configFile):
         print(f"Parsing config file at {configFile}") 
@@ -102,17 +103,19 @@ def makeNeutral(numberSims, configDict, outputDir):
                 dist = configDict[f"{param}_DIST"][0]
                 if dist == "fixed":
                         paramDict[param] = np.array([float(configDict[param][0])] * numberSims)
-                elif dist == "uniform" or dist == "normal":
+                elif dist == "uniform":
                         paramDict[param] = getattr(np.random,dist)(float(configDict[param][0]),float(configDict[param][1]),size=numberSims)
+                elif dist == "normal":
+                        paramDict[param] = stats.truncnorm.rvs((0.0000000000000001 - float(configDict[param][0]))/float(configDict[param][1]), (np.inf - float(configDict[param][0]))/float(configDict[param][1]), size = int(numberSims), loc = float(configDict[param][0]), scale = float(configDict[param][1]))
                 elif dist == "exponential":
                         paramDict[param] = getattr(np.random,dist)(float(configDict[param][0]), size=numberSims)
                 else:
                         print(f"Somehow you've gotten to this point with an unacceptable distribution parameter for {param}: {dist}. Please replace with one of 'fixed', 'uniform', 'normal', or 'exponential.'")
                         sys.exit(1)
                 if param == "NE":
-                        np.clip(paramDict[param],0,None,paramDict[param])
+                        np.clip(paramDict[param],1,None,paramDict[param])
                 else:
-                        np.clip(paramDict[param],0,1,paramDict[param])
+                        np.clip(paramDict[param],0.00000000000001,1,paramDict[param])
 
         index = np.array(range(1,int(numberSims)+1))
         neutral = np.column_stack((index, paramDict['NE'], paramDict['MU'], paramDict['RHO']))
@@ -126,8 +129,6 @@ def makeSweep(numberSims, configDict, outputDir):
                                 \tNe: {configDict['NE_DIST']} with {configDict['NE']}\n \
                                 \tper-bp mutation rate: {configDict['MU_DIST']} with {configDict['MU']}\n \
                                 \tper-bp recombination rate: {configDict['RHO_DIST']} with {configDict['RHO']}\n \
-                                \tpopulation sizes relative to Ne, in order backward in time: {configDict['CHANGESIZE']}\n \
-                                \tpopulation size change times, in generations back in time: {configDict['CHANGETIME']}\n \
                                 \tselection strength: {configDict['SEL_DIST']} with {configDict['SEL']}\n \
                                 \tselection time, in generations: {configDict['TIME_DIST']} with {configDict['TIME']}\n \
                                 \tstarting frequency of selected allele: {configDict['SAF_DIST']} with {configDict['SAF']}\n \
@@ -149,17 +150,19 @@ def makeSweep(numberSims, configDict, outputDir):
                 dist = configDict[f"{param}_DIST"][0]
                 if dist == "fixed":
                         paramDict[param] = np.array([float(configDict[param][0])] * numberSims)
-                elif dist == "uniform" or dist == "normal":
+                elif dist == "uniform":
                         paramDict[param] = getattr(np.random,dist)(float(configDict[param][0]),float(configDict[param][1]),size=numberSims)
+                elif dist == "normal":
+                        paramDict[param] = stats.truncnorm.rvs((0.0000000000000001 - float(configDict[param][0]))/float(configDict[param][1]), (np.inf - float(configDict[param][0]))/float(configDict[param][1]), size = int(numberSims), loc = float(configDict[param][0]), scale = float(configDict[param][1]))
                 elif dist == "exponential":
                         paramDict[param] = getattr(np.random,dist)(float(configDict[param][0]), size=numberSims)
                 else:
                         print(f"Somehow you've gotten to this point with an unacceptable distribution parameter for {param}: {dist}. Please replace with one of 'fixed', 'uniform', 'normal', or 'exponential.'")
                         sys.exit(1)
-                if param == "NE" or param == "TIME":
-                        np.clip(paramDict[param],0,None,paramDict[param])
+                if param == "NE":
+                        np.clip(paramDict[param],1,None,paramDict[param])
                 else:
-                        np.clip(paramDict[param],0,1,paramDict[param])
+                        np.clip(paramDict[param],0.00000000000001,1,paramDict[param])
         index = np.array(range(1,int(numberSims)+1))
         sweep = np.column_stack((index, paramDict['NE'], paramDict['MU'], paramDict['RHO'], paramDict['SEL'], paramDict['TIME'], paramDict['SAF'], paramDict['EAF']))
         np.savetxt(f"{outputDir}/training_data/sweep_data/array_sweep.txt",sweep,fmt=['%i','%i','%.16F','%.16F','%.16F','%i','%.16F','%.16F'],delimiter='\t',newline='\n',header="#ArrayIndex\tNE\tMU\tRHO\tSEL\tTIME\tSAF\tEAF", comments='')
@@ -167,7 +170,7 @@ def makeSweep(numberSims, configDict, outputDir):
         return sweep
 
 def main(numberSims, configFile, outputDir):
-        configDict = parseConfig(configFile)        
+        configDict = parseConfig(configFile)
         neutral = makeNeutral(numberSims, configDict, outputDir)
         sweep = makeSweep(numberSims, configDict, outputDir)
         return neutral, sweep, configDict
