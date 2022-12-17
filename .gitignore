@@ -8,3 +8,5 @@ test/
 fullTest/
 sifTest/
 *out
+*config_???.txt
+*run_simulate.sh

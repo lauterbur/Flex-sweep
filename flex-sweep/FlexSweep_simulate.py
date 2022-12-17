@@ -42,13 +42,25 @@ def trainingArray(argsDict):
                 print("--continue flag used, using existing training arrays if present")
                 if os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/array_neutral.txt") and os.path.getsize(f"{argsDict['outputDir']}/training_data/neutral_data/array_neutral.txt") > 0:
                         neutral = open(f"{argsDict['outputDir']}/training_data/neutral_data/array_neutral.txt", "r")
+                        if len(neutral.readlines()) < argsDict["numberSims"]:
+                                configDict = makeTrainingArray.parseConfig(configFile)
+                                neutral = makeTrainingArray.makeNeutral(numberSims, configDict, outputDir)
+                        else:
+                                configDict = makeTrainingArray.parseConfig(configFile)
+                                neutral = makeTrainingArray.makeNeutral(numberSims, configDict, outputDir)
                 else:
                         configDict = makeTrainingArray.parseConfig(configFile)
                         neutral = makeTrainingArray.makeNeutral(numberSims, configDict, outputDir)
                 if os.path.exists(f"{argsDict['outputDir']}/training_data/sweep_data/array_sweep.txt") and os.path.getsize(f"{argsDict['outputDir']}/training_data/sweep_data/array_sweep.txt") > 0:
-                        configDict = makeTrainingArray.parseConfig(configFile)
                         sweep = open(f"{argsDict['outputDir']}/training_data/sweep_data/array_sweep.txt", "r")
+                        if len(sweep.readlines()) < argsDict["numberSims"]:
+                                configDict = makeTrainingArray.parseConfig(configFile)
+                                sweep = makeTrainingArray.makeSweep(numberSims, configDict, outputDir)
+                        else:
+                                configDict = makeTrainingArray.parseConfig(configFile)
+                                sweep = makeTrainingArray.makeSweep(numberSims, configDict, outputDir)
                 else:
+                        configDict = makeTrainingArray.parseConfig(configFile)
                         sweep = makeTrainingArray.makeSweep(numberSims, configDict, outputDir)
         else:
                 neutral, sweep, configDict = makeTrainingArray.main(numberSims, configFile, outputDir)
@@ -158,9 +170,9 @@ def simulate(argsDict, configDict, simtype, run, chroms, locusLength):
                 runDict["TIME"] = int(arrayDict["TIME"][run-1]) 
                 runDict["SAF"] = float(arrayDict["SAF"][run-1]) 
                 runDict["EAF"] = float(arrayDict["EAF"][run-1]) 
-                if "CHANGETIME" in configDict and "CHANGESIZE" in configDict:
-                        runDict["CHANGETIME"] = configDict["CHANGETIME"]
-                        runDict["CHANGESIZE"] = configDict["CHANGESIZE"]
+        if "CHANGETIME" in configDict and "CHANGESIZE" in configDict:
+                runDict["CHANGETIME"] = configDict["CHANGETIME"]
+                runDict["CHANGESIZE"] = configDict["CHANGESIZE"]
         runDiscoal.main(runDict, argsDict['outputDir'], simtype, run, chroms, locusLength) 
 
 
