@@ -31,6 +31,9 @@ outputDir
                               -- ...
       -- classification (will include a predictions file)
 ~~~
+### Singularity container to run Flex-sweep and two pre-trained models:
+https://zenodo.org/record/7313705#.Y3KupL7ML0o
+
 ### Configuration file for making simulation array ###
 It is recommended to train Flex-sweep using simulations generated with a wide range of mutation rates, recombination rates,
 sweep strengths, sweep ages, swept allele starting frequencies, and swept allele ending frequencies. These should be chosen
