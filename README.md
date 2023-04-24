@@ -41,15 +41,14 @@ based on reasonable estimates that reflect your species.
 
 Choose a demographic model that represents reasonable expectations for your population.
 
-### Changelog:
-- 24 April 2023
--- changed order of statistics in feature vector (was: [iHS, nsl, iSAFE, DIND, hapDAF-o, hapDAF-s, highfreq, lowfreq, Sratio, HAF, H12], now: [DIND, HAF, hapDAF-o, iSAFE, highfreq, hapDAF-s, nsl, Sratio, lowfreq, iHS, H12]) reflecting new analyses in revision
+### Changelog 24 April 2023
+- changed order of statistics in feature vector (was: [iHS, nsl, iSAFE, DIND, hapDAF-o, hapDAF-s, highfreq, lowfreq, Sratio, HAF, H12], now: [DIND, HAF, hapDAF-o, iSAFE, highfreq, hapDAF-s, nsl, Sratio, lowfreq, iHS, H12]) reflecting new analyses in revision
 
--- upload new singularity (apptainer) image to zenodo with new statistic order
+- upload new singularity (apptainer) image to zenodo with new statistic order
 
--- upload new pre-trained models with new statistic order
+- upload new pre-trained models with new statistic order
 
--- simulation config file can now take upper and lower bounds for normal distributions of parameters
+- simulation config file can now take upper and lower bounds for normal distributions of parameters
 
 
 ### See wiki for full documentation
