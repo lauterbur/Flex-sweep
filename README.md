@@ -7,8 +7,14 @@ Flex-sweep can be run entirely within the singularity container without download
 
 ### Singularity container to run Flex-sweep and two pre-trained models:
 https://zenodo.org/record/7860595    
-Other requirements:
-- tidyverse (R) (for plots)
+Other requirements for plotting:
+- python3
+- R
+- R libraries:  
+++ ggplot2  
+++ tidyverse  
+++ viridis  
+++ yardstick  
 
 It creates the following directory structure:
 ~~~
