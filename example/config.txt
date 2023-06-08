@@ -20,8 +20,8 @@ EAF = 0.99,0.01 # frequency of the swept allele when the sweep ended (EAF = 1 gi
 
 ###### population demographic parameters
 ###### comment out CHANGESIZE and CHANGETIME if not simulating population size changes ######
-CHANGESIZE = 1.1,1.2,0.9 # comma-separated list of population sizes relative to NE (specified above) back in time 
+CHANGESIZE = 0.1,1.2,0.9 # comma-separated list of population sizes relative to NE (specified above) back in time 
 CHANGETIME = 40,2000,3500 # comma-separated list of times the population changed size back in time, in generations
 # using the above settings:
-## thinking back in time, the population decreased to 0.1NE (100) 40 generations ago, then increased to 1.2NE (12000) 2000 generations ago, then decreased to 0.9NE (9000) 3500 generations ago
-## thinking forward in time, the population started at 0.9NE (9000), then increased to 1.2NE (12000) 3500 generations ago, then decreased to 0.1Ne (100) 2000 generations ago, then increased to NE (10000) 40 generations ago, and remained unchanged until sampling
+## thinking back in time, the population is at Ne (10000) at the current time, then decreased to 0.1NE (1000) 40 generations ago, then increased to 1.2NE (12000) 2000 generations ago, then decreased to 0.9NE (9000) 3500 generations ago
+## thinking forward in time, the population started at 0.9NE (9000), then increased to 1.2NE (12000) 3500 generations ago, then decreased to 0.1Ne (1000) 2000 generations ago, then increased to NE (10000) 40 generations ago, and remained unchanged until sampling
