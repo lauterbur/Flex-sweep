@@ -161,7 +161,7 @@ def makeSweep(numberSims, configDict, outputDir):
                         sys.exit(1)
                 if param == "NE":
                         np.clip(paramDict[param],1,None,paramDict[param])
-                else:
+                elif param != "TIME":
                         np.clip(paramDict[param],0.00000000000001,1,paramDict[param])
         index = np.array(range(1,int(numberSims)+1))
         sweep = np.column_stack((index, paramDict['NE'], paramDict['MU'], paramDict['RHO'], paramDict['SEL'], paramDict['TIME'], paramDict['SAF'], paramDict['EAF']))
