@@ -17,6 +17,8 @@ print(neutral_preds)
 confusion_data <- pred_data %>%
   group_by(type) %>%
   count(predicted_class,.drop=FALSE) %>%
+  merge(expand.grid(type=c("neutral","sweep"),predicted_class=c("neutral","sweep")),all=TRUE) %>%
+  replace_na(list(n=0)) %>% 
   mutate(true_false=ifelse(type==predicted_class & type=="neutral","true_negative",
                            ifelse(type==predicted_class & type=="sweep","true_positive",
                                   ifelse(type!=predicted_class & type=="neutral","false_positive","false_negative")))) %>%
