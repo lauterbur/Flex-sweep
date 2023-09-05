@@ -29,7 +29,7 @@ do
         read -r STOPHAP<<<$(awk -v start="$STARTPOS" -v stop="$ENDPOS" '$2 >= start && $2 <= stop {print $2,NR}' $MAP | awk '{print $2}' | tail -1)
         sed -n "${STARTHAP},${STOPHAP}p" $HAP > ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.hap
 
-        ml=$( wc -l ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.map)
+        ml=$( wc -l ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.map | cut -d" " -f1)
         wc -l ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.hap
 
         if [[ $ml -lt 100 ]]
