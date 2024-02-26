@@ -35,6 +35,7 @@ def writeFV(fV, path, type):
 
 def fvWrap(argsDict, simFile, type):
         sim = os.path.basename(simFile)
+        print(sim)
         iter = int(simFile.split("_")[-1])
         path = f"{argsDict['outputDir']}/training_data/{type}_data"
         statFiles = glob.glob(f"{argsDict['outputDir']}/training_data/{type}_data/stats/center_*/window_*/norm/{type}_data_{iter}_*_norm.*")
@@ -55,6 +56,7 @@ def fvWrap(argsDict, simFile, type):
                 fV.extend(paramsIter)
         else:
                 print(f"No parameter array at {argsDict['outputDir']}/training_data/{type}_data/array_{type}.txt, creating {type} feature vector without this information.")
+                featureFile = pd.DataFrame(np.empty((0, 1155))) # total number of features: 11*5*21 
         for stat in ["ihs","iSAFE","nsl","DIND","hDo","hDs","hf","lf","S","HAF","H12"]:
                 for center in range(argsDict['minCenter'], argsDict['maxCenter'] + argsDict['distCenters'], argsDict['distCenters']):
                         for window in [50000, 100000, 200000, 500000, 1000000]:
@@ -73,10 +75,12 @@ def fvWrap(argsDict, simFile, type):
         return featureFile
 
 def parallelFV(argsDict, simFiles, type):
+        print("parallelFV")
         featureFile = Parallel(n_jobs=argsDict["numJobs"])(delayed(fvWrap)(argsDict, i, type) for i in simFiles)
         return pd.concat(featureFile)
 
 def main(argsDict, simFiles, type):
+        print("runFV")
         fullFeatureFile = parallelFV(argsDict, simFiles, type)
         features=[]
         if len(fullFeatureFile.columns) == 1155+4:

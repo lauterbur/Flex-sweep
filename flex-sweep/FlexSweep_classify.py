@@ -59,6 +59,7 @@ def cutHapMap(argsDict):
         if os.path.exists(windowsFile):
                 os.remove(windowsFile)
         cutCommandLine = f"utils/cut_to_1.2Mb.sh {argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows {argsDict['classifyName']} {argsDict['hapmap'][0]} {argsDict['hapmap'][1]} {argsDict['windowStep']}"
+        print(cutCommandLine)
         cutCommandRun=subprocess.Popen(cutCommandLine.split(),stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         calcOutput,calcError=cutCommandRun.communicate()
         # make directory for each window
@@ -76,12 +77,13 @@ def calculateStats(argsDict, windowFile):
         for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
                 os.makedirs(f"{windowFile}/stats/center_{center}", exist_ok=True)
         calcCommandLine = f"calculate_stats/runCalculateClassifyStats.sh {windowFile} {argsDict['locusLength']} {windowStart}" 
+        print(calcCommandLine)
         calcCommandRun = subprocess.check_output(calcCommandLine.split(), stderr=subprocess.PIPE)
 
 def calculateWrap(argsDict, windows):
         print("Calculating statistics in each sliding window")
         windowFiles = [f"{argsDict['outputDir']}/classification/{argsDict['classifyName']}Windows/{argsDict['classifyName']}_{x}" for x in windows]
-        Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(calculateStats)(argsDict, i) for i in windowFiles[0:4])
+        Parallel(n_jobs=argsDict["numJobs"], verbose=100, backend="multiprocessing")(delayed(calculateStats)(argsDict, i) for i in windowFiles)
 
 def normStats(argsDict, windows):
         print(f"Normalizing statistics from data at {argsDict['normLoc']}")

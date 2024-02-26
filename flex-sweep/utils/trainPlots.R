@@ -14,17 +14,32 @@ pred_data <- bind_rows(neutral = neutral_data, sweep = sweep_data, .id = "type")
 
 print(neutral_preds)
 ### get true/false counts
-confusion_data <- pred_data %>%
+pred_data %>%
   group_by(type) %>%
   count(predicted_class,.drop=FALSE) %>%
+  merge(expand.grid(type=c("neutral","sweep"),predicted_class=c("neutral","sweep")),all=TRUE) %>%
+  replace_na(list(n=0)) %>% 
   mutate(true_false=ifelse(type==predicted_class & type=="neutral","true_negative",
                            ifelse(type==predicted_class & type=="sweep","true_positive",
                                   ifelse(type!=predicted_class & type=="neutral","false_positive","false_negative")))) %>%
-  ungroup(type) %>%
+  ungroup() %>%
+  select(-c(type,predicted_class)) %>%
+  print()
+
+confusion_data <- pred_data %>%
+  group_by(type) %>%
+  count(predicted_class,.drop=FALSE) %>%
+  merge(expand.grid(type=c("neutral","sweep"),predicted_class=c("neutral","sweep")),all=TRUE) %>%
+  replace_na(list(n=0)) %>% 
+  mutate(true_false=ifelse(type==predicted_class & type=="neutral","true_negative",
+                           ifelse(type==predicted_class & type=="sweep","true_positive",
+                                  ifelse(type!=predicted_class & type=="neutral","false_positive","false_negative")))) %>%
+  ungroup() %>%
   select(-c(type,predicted_class)) %>%
   spread(true_false,n,fill=0,drop=FALSE) #%>%
 
 ## get rates
+print(confusion_data)
 rate_data <- confusion_data %>%
   ungroup() %>%
   mutate(false_negative=false_negative/rowSums(.[c(1,4)]),
@@ -80,7 +95,7 @@ p <- p +
 ggsave(paste0(outputDir,"/plots/training_ROC.png"), p)
 
 ### load history data
-history <- paste0(outputDir,"/",outputDir,"Model/",outputDir,"_history.csv")
+history <- paste0(outputDir,"/",outputDir,"Model/",outputDir,".model_history.csv")
 history_data <- read_csv(history)
 
 h <- history_data %>%
