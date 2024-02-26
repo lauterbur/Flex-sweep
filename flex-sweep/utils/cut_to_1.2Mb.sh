@@ -9,11 +9,8 @@ MAP=$4
 WINDOW=1200000
 STEP=$5
 
-head $MAP
-FIRSTPOS=$( head -1 ${MAP} | awk '{print $3}' )
-LASTPOS=$( tail -1 ${MAP} | awk '{print $3}' )
-echo $FIRSTPOS
-echo $LASTPOS
+FIRSTPOS=$( head -1 ${MAP} | awk '{print $2}' )
+LASTPOS=$( tail -1 ${MAP} | awk '{print $2}' )
 SIZE=$(( $LASTPOS - $FIRSTPOS ))
 NUMBER=$(( ${SIZE} / ${STEP}  ))
 echo "number of windows: " $NUMBER
