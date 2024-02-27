@@ -41,11 +41,9 @@ print(opt$map)
 print(opt$hap)
 map<-read.table(opt$map)
 hap<-read.table(opt$hap,colClasses="character")
-
+print(hap)
 names(map)<-c("chr","ID","genpos","physpos")
 map$ID<-rownames(map)
-print(head(map$physpos))
-print(tail(map$physpos))
 map$physpos<-map$physpos-opt$start
 
 chr<-map[1,1]
@@ -58,13 +56,9 @@ chr<-map[1,1]
 	if(minposition<0 | maxposition>1200000){stop(paste("check center = ",opt$center," and window length = ",opt$window,"\nminposition is ",minposition,", maxposition is ",maxposition))} 
 
         positions<-map$physpos
-        print(head(positions))
-        print(tail(positions))
 	pos_locations<-which(positions>=minposition & positions<=maxposition)
 	if(length(pos_locations)<1){stop("no SNPs in this window")}
 	phys_positions<-positions[pos_locations]
-        print(head(phys_positions))
-        print(tail(phys_positions))
 	gen_positions<-map$genpos[pos_locations]
 
         locusID<-seq(0,length(phys_positions)-1)
@@ -82,6 +76,8 @@ chr<-map[1,1]
       # make .hap file
 #        hap_df<-unite(hap[pos_locations,,drop=FALSE],"snps",everything(),sep="")
         hap_df<-hap[pos_locations,,drop=FALSE]
+        print(head(hap))
+        print(colnames(hap))
         snps<-apply( hap_df[,c(1:length(colnames(hap)))], 1, paste0, collapse="")
 #        hap_df
         hap_isafe<-as.data.frame(hap_df,stringsAsFactors = FALSE)
