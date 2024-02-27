@@ -2,6 +2,7 @@
 
 ###### species parameters
 NE_DIST = <fixed|uniform|exponential|normal>
+<<<<<<< HEAD
 NE = <current NE> # current! if NE_DIST = uniform, two comma-separated values: low,high; if NE_DIST = normal, four comma-separated values: mean,sd,lowerbound,upperbound; if NE_DIST = exponential, fixed value: scale 
 MU = <mutation rate> # per bp mutation rate
 MU_DIST = <fixed|uniform|exponential|normal> # as above
