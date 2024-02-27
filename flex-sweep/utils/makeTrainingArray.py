@@ -106,7 +106,7 @@ def makeNeutral(numberSims, configDict, outputDir):
                 elif dist == "uniform":
                         paramDict[param] = getattr(np.random,dist)(float(configDict[param][0]),float(configDict[param][1]),size=numberSims)
                 elif dist == "normal":
-                        paramDict[param] = stats.truncnorm.rvs((0.0000000000000001 - float(configDict[param][0]))/float(configDict[param][1]), (np.inf - float(configDict[param][0]))/float(configDict[param][1]), size = int(numberSims), loc = float(configDict[param][0]), scale = float(configDict[param][1]))
+                        paramDict[param] = stats.truncnorm.rvs((float(configDict[param][2]) - float(configDict[param][0]))/float(configDict[param][1]), (float(configDict[param][3]) - float(configDict[param][0]))/float(configDict[param][1]), size = int(numberSims), loc = float(configDict[param][0]), scale = float(configDict[param][1]))
                 elif dist == "exponential":
                         paramDict[param] = getattr(np.random,dist)(float(configDict[param][0]), size=numberSims)
                 else:
@@ -151,33 +151,27 @@ def makeSweep(numberSims, configDict, outputDir):
                 if dist == "fixed":
                         paramDict[param] = np.array([float(configDict[param][0])] * numberSims)
                 elif dist == "uniform":
-                        print(param)
-                        print(float(configDict[param][0]))
-                        print(float(configDict[param][1]))
-                        print(getattr(np.random,dist)(float(configDict[param][0]),float(configDict[param][1]),size=numberSims))
                         paramDict[param] = getattr(np.random,dist)(float(configDict[param][0]),float(configDict[param][1]),size=numberSims)
                 elif dist == "normal":
-                        paramDict[param] = stats.truncnorm.rvs((0.0000000000000001 - float(configDict[param][0]))/float(configDict[param][1]), (np.inf - float(configDict[param][0]))/float(configDict[param][1]), size = int(numberSims), loc = float(configDict[param][0]), scale = float(configDict[param][1]))
+                        paramDict[param] = stats.truncnorm.rvs((float(configDict[param][2]) - float(configDict[param][0]))/float(configDict[param][1]), (float(configDict[param][3]) - float(configDict[param][0]))/float(configDict[param][1]), size = int(numberSims), loc = float(configDict[param][0]), scale = float(configDict[param][1]))
                 elif dist == "exponential":
                         paramDict[param] = getattr(np.random,dist)(float(configDict[param][0]), size=numberSims)
                 else:
                         print(f"Somehow you've gotten to this point with an unacceptable distribution parameter for {param}: {dist}. Please replace with one of 'fixed', 'uniform', 'normal', or 'exponential.'")
                         sys.exit(1)
                 if param == "NE":
-                        np.clip(paramDict[param],1,None,paramDict[param])
-                elif param != "TIME":
+                        np.clip(paramDict[param],1,None,paramDict[param]).astype(int)
+                if param == "SAF":
+                        np.clip(paramDict[param],0,None,paramDict[param]).astype(int)
+                if param == "EAF":
+                        np.clip(paramDict[param],0,1,paramDict[param]).astype(int)
+                elif param == "TIME":
+                        np.clip(paramDict[param],1,None,paramDict[param]).astype(int)
+                        print(paramDict[param])
+                else:
                         np.clip(paramDict[param],0.00000000000001,1,paramDict[param])
-        if param == "SAF": # change 50% of sweeps to hard
-                mask = np.random.choice([0, 1], size=ParamDict[param].shape, p=((1 - 0.5), 0.5)).astype(bool)
-                replace = np.array([float(0)] * len(paramDict[param][mask]))
-                paramDict[param][mask] = replace
-        elif param == "EAF": # change 10% of sweeps to complete
-                mask = np.random.choice([0, 1], size=paramDict[param].shape, p=((1 - 0.1), 0.1)).astype(bool)
-                replace = np.array([float(1)] * len(paramDict[param][mask]))
-                paramDict[param][mask] = replace
         index = np.array(range(1,int(numberSims)+1))
         sweep = np.column_stack((index, paramDict['NE'], paramDict['MU'], paramDict['RHO'], paramDict['SEL'], paramDict['TIME'], paramDict['SAF'], paramDict['EAF']))
-        print(sweep)
         np.savetxt(f"{outputDir}/training_data/sweep_data/array_sweep.txt",sweep,fmt=['%i','%i','%.16F','%.16F','%.16F','%i','%.16F','%.16F'],delimiter='\t',newline='\n',header="#ArrayIndex\tNE\tMU\tRHO\tSEL\tTIME\tSAF\tEAF", comments='')
 
         return sweep
