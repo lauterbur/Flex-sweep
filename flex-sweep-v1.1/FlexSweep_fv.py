@@ -396,12 +396,14 @@ def main(commandline):
         if not argsDict['keepStats']:        
                 simFiles = glob.glob(f"{argsDict['outputDir']}/training_data/neutral_data/stats/*.*", GLOB_BRACE) # get only files (to keep norm bins)
                 simFiles.extend(glob.glob(f"{argsDict['outputDir']}/training_data/neutral_data/stats/center_*"))
+                tarFile = tarfile.open(f"{argsDict['outputDir']}/training_data/neutral_data/stats/neutral_data_stats.tgz")
                 for i in neutralFiles:
-                        os.remove(i)
+                        tarFile.add(i)
                 simFiles = glob.glob(f"{argsDict['outputDir']}/training_data/sweep_data/stats/*.*", GLOB_BRACE) # get only files (to keep norm bins)
                 simFiles.extend(glob.glob(f"{argsDict['outputDir']}/training_data/sweep_data/stats/center_*"))
+                tarFile = tarfile.open(f"{argsDict['outputDir']}/training_data/sweep_data/stats/sweep_data_stats.tgz")
                 for i in sweepFiles:
-                        os.remove(i)
+                        tarFile.add(i)
 
 if __name__=="__main__":
         main(sys.argv[1:])
