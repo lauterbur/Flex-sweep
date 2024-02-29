@@ -10,6 +10,7 @@ from joblib import Parallel, delayed
 import glob
 import shutil
 import tarfile
+import pandas as pd
 from utils import runNormNeutral, runNormStats, runFV
 
 def parse_arguments(commandline):
@@ -56,17 +57,20 @@ def chromAllStatsMissing(argsDict, sims):
         simDict = dict(zip(simPre,simPaths))
         statsUnfinished=set()
         for sim in simDict:
-                if "neutral" in sims[0]:
-                        statFile = pd.read_csv(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}_fulllocus.stats", sep='\s', names=["stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
-                        for stat in ["DIND","hDo","hDs","hf","lf","S","ihs","iSAFE","nsl","H12","HAF"]:
-                                statVals = statFile.loc[statFile['stat'] == stat]
-                                if statVals.empty:
-                                        statsUnfinished.add((sim, stat))
+                if os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}_fulllocus.stats"): # check if individual stats exist
+                        if "neutral" in sims[0]:
+                                statFile = pd.read_csv(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}_fulllocus.stats", sep='\s', names=["stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
+                                for stat in ["DIND","hDo","hDs","hf","lf","S","ihs","iSAFE","nsl","H12","HAF"]:
+                                        statVals = statFile.loc[statFile['stat'] == stat]
+                                        if statVals.empty:
+                                                statsUnfinished.add((sim, stat))
+                        else:
+                                for stat in ["DIND","hDo","hDs","hf","lf","S","H12","HAF"]:
+                                        statVals = statFile.loc[statFile['stat'] == stat]
+                                        if statVals.empty:
+                                                statsUnfinished.add((sim, stat))
                 else:
-                        for stat in ["DIND","hDo","hDs","hf","lf","S","H12","HAF"]:
-                                statVals = statFile.loc[statFile['stat'] == stat]
-                                if statVals.empty:
-                                        statsUnfinished.add((sim, stat))
+                        statsUnfinished.add((sim, "all"))
         return statsUnfinished
 
 def centerAllStatsMissing(argsDict, simList):
@@ -76,12 +80,15 @@ def centerAllStatsMissing(argsDict, simList):
         simDict = dict(zip(pre,paths))
         statsUnfinished=set()
         for sim in simDict:
-                statFile = pd.read_csv(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}.stats", sep='\s', names=["center", "stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
-                for stat in ["ihs","iSAFE","nsl"]:
-                        for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
-                                statVals = statFile.loc[(statFile['stat'] == stat) & (statFile['center'] == center)]
-                                if statVals.empty:
-                                        statsUnfinished.add((sim, center, stat))
+                if os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}.stats"): # check if individual stats exist
+                        statFile = pd.read_csv(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}.stats", sep='\s', names=["center", "stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
+                        for stat in ["ihs","iSAFE","nsl"]:
+                                for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
+                                        statVals = statFile.loc[(statFile['stat'] == stat) & (statFile['center'] == center)]
+                                        if statVals.empty:
+                                                statsUnfinished.add((sim, center, stat))
+                else:
+                        statsUnfinished.add((sim, "all"))
         return statsUnfinished
 
 def chromIndStatsMissing(argsDict, simFile):
@@ -89,12 +96,14 @@ def chromIndStatsMissing(argsDict, simFile):
         chromStatsUnfinished=set()
         simtype="neutral"
         simFile=simFile.split(".")[0]
-        if os.path.exists((f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}_fulllocus.stats"): # check if individual stats exist
+        if os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}_fulllocus.stats"): # check if individual stats exist
                 statFile = pd.read_csv(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}_fulllocus.stats", sep='\s', names=["stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
                 for stat in ["HAF","H12","DIND","hDo","hDs","hf","lf","S","ihs","iSAFE","nsl"]:
                         statVals = statFile.loc[statFile['stat'] == stat]
                         if statVals.empty:
                                 chromStatsUnfinished.add((sim, stat))
+        else:
+                chromStatsUnfinished.add((sim, "all"))
         return chromStatsUnfinished
 
 def centerIndStatsMissing(argsDict, simFile):
@@ -106,11 +115,15 @@ def centerIndStatsMissing(argsDict, simFile):
         sim = os.path.basename(simFile)
         pre = os.path.splitext(sim)[0]
 
-        if os.path.exists(f"{path}/stats"):
+        if os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}.stats"): # check if individual stats exist
+                statFile = pd.read_csv(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}", sep='\s', names=["center","stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
                 for stat in ["HAF","H12","DIND","hDo","hDs","hf","lf","S","ihs","iSAFE","nsl"]:
                         for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
-                                if not os.path.exists(f"{path}/stats/center_{center}/{pre}_c{center}.{stat}") or not os.path.getsize(f"{path}/stats/center_{center}/{pre}_c{center}.{stat}") > 0:
-                                        centerStatsUnfinished.add(f"{path}/stats/center_{center}/{pre}_c{center}.{stat}")
+                                statVals = statFile.loc[(statFile['stat'] == stat) & (statFile['center'] == center)]
+                                if statVals.empty:
+                                        centerStatsUnfinished.add((sim, stat))
+        else:
+                centerStatsUnfinished.add((sim, "all"))
         return centerStatsUnfinished
 
 def checkSims(argsDict, simFile, simType):
@@ -276,7 +289,7 @@ def calculateWrap(argsDict):
 #                centerSweepStatsUnfinishedPaths = ['/'.join(str.split(x,"/")[0:-3]) for x in centerSweepStatsUnfinishedSims]
 #                centerSweepStatsUnfinishedSims = [str.split(x,"/")[-1] for x in centerSweepStatsUnfinishedSims]
 #                centerSweepStatsUnfinishedSimsPaths = set([f"{i}/{j}" for i, j in zip(centerSweepStatsUnfinishedPaths, centerSweepStatsUnfinishedSims)])
-                 centerSweepStatsUnfinishedSims = set(f"{argsDict['outputDir']}/training_data/sweep_data/{x[0]}" for x in centerSweepStatsUnfinished)
+                centerSweepStatsUnfinishedSims = set(f"{argsDict['outputDir']}/training_data/sweep_data/{x[0]}" for x in centerSweepStatsUnfinished)
 
                 sweepStatsUnfinished = list(chromSweepStatsUnfinishedSims | centerSweepStatsUnfinishedSimsPaths)
 
@@ -339,7 +352,6 @@ def calculateWrap(argsDict):
                         print(f"Not all sliding center statistics for sweeps were calculated successfully, check {centerStatsUnfinished} and rerun with --continue")
                         sys.exit(1)
                 elif not centerStatsUnfinished and not argsDict['keepSims']:
-                if not argsDict['keepSims']:
                         print("Sweep statistics finished and --keepSims is false, compressing simulations.")
                         sweepFiles = glob.glob(f"{argsDict['outputDir']}/training_data/sweep_data/sweep_data_*.out")
                         tarFile = tarfile.open(f"{argsDict['outputDir']}/training_data/sweep_data/sweep_data_sims.tgz")
