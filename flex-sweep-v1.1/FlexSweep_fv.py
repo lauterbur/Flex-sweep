@@ -54,11 +54,10 @@ def chromAllStatsMissing(argsDict, sims):
         sims = [os.path.basename(x) for x in sims]
         simPre = [os.path.splitext(x)[0] for x in sims]
         simDict = dict(zip(simPre,simPaths))
-#        center = int(argsDict["locusLength"]/2)
         statsUnfinished=set()
         for sim in simDict:
                 if "neutral" in sims[0]:
-                        statFile = pd.read_csv(file, sep='\s', names=["stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
+                        statFile = pd.read_csv(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}_fulllocus.stats", sep='\s', names=["stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
                         for stat in ["DIND","hDo","hDs","hf","lf","S","ihs","iSAFE","nsl","H12","HAF"]:
                                 statVals = statFile.loc[statFile['stat'] == stat]
                                 if statVals.empty:
@@ -86,15 +85,14 @@ def centerAllStatsMissing(argsDict, simList):
 def chromIndStatsMissing(argsDict, simFile):
         # check if neutralnorm stats and exist for simFile
         chromStatsUnfinished=set()
-        #minCenter = argsDict["minCenter"]
-        #maxCenter = argsDict["maxCenter"]
         simtype="neutral"
         simFile=simFile.split(".")[0]
-        #center = argsDict["locusLength"]/2
-        if os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/stats"): # check if individual stats exist
+        if os.path.exists((f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}_fulllocus.stats"): # check if individual stats exist
+                statFile = pd.read_csv(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}_fulllocus.stats", sep='\s', names=["stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
                 for stat in ["HAF","H12","DIND","hDo","hDs","hf","lf","S","ihs","iSAFE","nsl"]:
-                        if not os.path.exists(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{simFile}.{stat}") or not os.path.getsize(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{simFile}.{stat}") > 0:
-                                chromStatsUnfinished.add(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{simFile}.{stat}")
+                        statVals = statFile.loc[statFile['stat'] == stat]
+                        if statVals.empty:
+                                chromStatsUnfinished.add((sim, stat))
         return chromStatsUnfinished
 
 def centerIndStatsMissing(argsDict, simFile):
@@ -211,14 +209,14 @@ def makeNormBins(argsDict):
 def calculateWrap(argsDict):
         neutralSims = glob.glob(f"{argsDict['outputDir']}/training_data/neutral_data/neutral_data_*.out")
         if len(neutralSims) < 1:
-                print("No neutral simulations to use.")
+                print("No neutral simulations to use, are the compressed?")
                 sys.exit(1)
         # check for all simulations
         for simFile in neutralSims:
                 checkSims(argsDict, simFile, "neutral")
         sweepSims = glob.glob(f"{argsDict['outputDir']}/training_data/sweep_data/sweep_data_*.out")
         if len(sweepSims) < 1:
-                print("No sweep simulations to use.")
+                print("No sweep simulations to use, are they compressed?")
                 sys.exit(1)
         # check for all simulations
         for simFile in sweepSims:
