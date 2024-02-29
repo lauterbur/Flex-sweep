@@ -76,10 +76,12 @@ def centerAllStatsMissing(argsDict, simList):
         simDict = dict(zip(pre,paths))
         statsUnfinished=set()
         for sim in simDict:
+                statFile = pd.read_csv(f"{argsDict['outputDir']}/training_data/neutral_data/stats/{sim}.stats", sep='\s', names=["center", "stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
                 for stat in ["ihs","iSAFE","nsl"]:
                         for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
-                                if not os.path.exists(f"{simDict[sim]}/stats/center_{center}/{sim}_c{center}.{stat}") or not os.path.getsize(f"{simDict[sim]}/stats/center_{center}/{sim}_c{center}.{stat}") > 0:
-                                        statsUnfinished.add(f"{simDict[sim]}/stats/center_{center}/{sim}_c{center}.{stat}")
+                                statVals = statFile.loc[(statFile['stat'] == stat) & (statFile['center'] == center)]
+                                if statVals.empty:
+                                        statsUnfinished.add((sim, center, stat))
         return statsUnfinished
 
 def chromIndStatsMissing(argsDict, simFile):
@@ -225,14 +227,13 @@ def calculateWrap(argsDict):
         if argsDict['continue']:
                 print("continue")
                 os.makedirs(f"{argsDict['outputDir']}/training_data/neutral_data/stats", exist_ok=True)
-#                for center in range(argsDict["minCenter"], argsDict["maxCenter"] + argsDict["distCenters"], argsDict["distCenters"]):
-#                        os.makedirs(f"{argsDict['outputDir']}/training_data/neutral_data/stats/center_{center}", exist_ok=True)
                 print("Checking for any unfinished chromosome-wide neutral statistics because of the --continue flag, this may take a while")
                 chromNeutralStatsUnfinished = chromAllStatsMissing(argsDict, neutralSims)
                 if chromNeutralStatsUnfinished:
                         print(f"Calculating missing chromosome-wide neutral statistics")
-                        chromNeutralStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in chromNeutralStatsUnfinished]
-                        chromNeutralStatsUnfinishedSims = set([f"{'_'.join(str.split(x,'_')[0:-1])}.out".replace("stats/","") for x in chromNeutralStatsUnfinishedPartial])
+#                        chromNeutralStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in chromNeutralStatsUnfinished]
+#                        chromNeutralStatsUnfinishedSims = set([f"{'_'.join(str.split(x,'_')[0:-1])}.out".replace("stats/","") for x in chromNeutralStatsUnfinishedPartial])
+                        chromNeutralStatsUnfinishedSims = set(f"{argsDict['outputDir']}/training_data/neutral_data/{x[0]}" for x in chromNeutralStatsUnfinished)
                         # check if neutral chromosome-wide stats completed
                         Parallel(n_jobs=argsDict["numJobs"])(delayed(calculateChromStats)(argsDict, i) for i in chromNeutralStatsUnfinishedSims)
                         print("Making neutral normalization bins")
@@ -245,12 +246,13 @@ def calculateWrap(argsDict):
                 centerNeutralStatsUnfinished = centerAllStatsMissing(argsDict, neutralSims)
                 if centerNeutralStatsUnfinished:
                         print(f"Calculating missing sliding center neutral statistics")
-                        centerNeutralStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in centerNeutralStatsUnfinished]
-                        centerNeutralStatsUnfinishedSims = [f"{'_'.join(str.split(x,'_')[0:-1])}.out" for x in centerNeutralStatsUnfinishedPartial]
-                        centerNeutralStatsUnfinishedPaths = ['/'.join(str.split(x,"/")[0:-3]) for x in centerNeutralStatsUnfinishedSims]
-                        centerNeutralStatsUnfinishedSims = [str.split(x,"/")[-1] for x in centerNeutralStatsUnfinishedSims]
-                        centerNeutralStatsUnfinishedSimsPaths = set([f"{i}/{j}" for i, j in zip(centerNeutralStatsUnfinishedPaths, centerNeutralStatsUnfinishedSims)])
-                        Parallel(n_jobs=argsDict["numJobs"])(delayed(calculateCenterStats)(argsDict, i) for i in centerNeutralStatsUnfinishedSimsPaths)
+#                        centerNeutralStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in centerNeutralStatsUnfinished]
+#                        centerNeutralStatsUnfinishedSims = [f"{'_'.join(str.split(x,'_')[0:-1])}.out" for x in centerNeutralStatsUnfinishedPartial]
+#                        centerNeutralStatsUnfinishedPaths = ['/'.join(str.split(x,"/")[0:-3]) for x in centerNeutralStatsUnfinishedSims]
+#                        centerNeutralStatsUnfinishedSims = [str.split(x,"/")[-1] for x in centerNeutralStatsUnfinishedSims]
+#                        centerNeutralStatsUnfinishedSimsPaths = set([f"{i}/{j}" for i, j in zip(centerNeutralStatsUnfinishedPaths, centerNeutralStatsUnfinishedSims)])
+                        centerNeutralStatsUnfinishedSims = set(f"{argsDict['outputDir']}/training_data/neutral_data/{x[0]}" for x in centerNeutralStatsUnfinished)
+                        Parallel(n_jobs=argsDict["numJobs"])(delayed(calculateCenterStats)(argsDict, i) for i in centerNeutralStatsUnfinishedSims)
                 if not argsDict['keepSims']:
                         print("Neutral statistics finished and --keepSims is false, compressing simulations.")
                         neutralFiles = glob.glob(f"{argsDict['outputDir']}/training_data/neutral_data/neutral_data_*.out")
@@ -263,16 +265,18 @@ def calculateWrap(argsDict):
 #                        os.makedirs(f"{argsDict['outputDir']}/training_data/sweep_data/stats/center_{center}", exist_ok=True)
                 print("Checking for any unfinished chromosome-wide sweep statistics because of the --continue flag, this may take a while")
                 chromSweepStatsUnfinished = chromAllStatsMissing(argsDict, sweepSims)
-                chromSweepStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in chromSweepStatsUnfinished]
-                chromSweepStatsUnfinishedSims = set([f"{'_'.join(str.split(x,'_')[0:-1])}.out".replace("stats/","") for x in chromSweepStatsUnfinishedPartial])
+                chromSweepStatsUnfinished = s = set(f"{argsDict['outputDir']}/training_data/sweep_data/{x[0]}" for x in chromSweepStatsUnfinished)
+#                chromSweepStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in chromSweepStatsUnfinished]
+#                chromSweepStatsUnfinishedSims = set([f"{'_'.join(str.split(x,'_')[0:-1])}.out".replace("stats/","") for x in chromSweepStatsUnfinishedPartial])
 
                 print("Checking for any unfinished sliding center sweep statistics because of the --continue flag, this may take a while")
                 centerSweepStatsUnfinished = centerAllStatsMissing(argsDict, sweepSims)
-                centerSweepStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in centerSweepStatsUnfinished]
-                centerSweepStatsUnfinishedSims = [f"{'_'.join(str.split(x,'_')[0:-1])}.out" for x in centerSweepStatsUnfinishedPartial]
-                centerSweepStatsUnfinishedPaths = ['/'.join(str.split(x,"/")[0:-3]) for x in centerSweepStatsUnfinishedSims]
-                centerSweepStatsUnfinishedSims = [str.split(x,"/")[-1] for x in centerSweepStatsUnfinishedSims]
-                centerSweepStatsUnfinishedSimsPaths = set([f"{i}/{j}" for i, j in zip(centerSweepStatsUnfinishedPaths, centerSweepStatsUnfinishedSims)])
+#                centerSweepStatsUnfinishedPartial = [os.path.splitext(x)[0] for x in centerSweepStatsUnfinished]
+#                centerSweepStatsUnfinishedSims = [f"{'_'.join(str.split(x,'_')[0:-1])}.out" for x in centerSweepStatsUnfinishedPartial]
+#                centerSweepStatsUnfinishedPaths = ['/'.join(str.split(x,"/")[0:-3]) for x in centerSweepStatsUnfinishedSims]
+#                centerSweepStatsUnfinishedSims = [str.split(x,"/")[-1] for x in centerSweepStatsUnfinishedSims]
+#                centerSweepStatsUnfinishedSimsPaths = set([f"{i}/{j}" for i, j in zip(centerSweepStatsUnfinishedPaths, centerSweepStatsUnfinishedSims)])
+                 centerSweepStatsUnfinishedSims = set(f"{argsDict['outputDir']}/training_data/sweep_data/{x[0]}" for x in centerSweepStatsUnfinished)
 
                 sweepStatsUnfinished = list(chromSweepStatsUnfinishedSims | centerSweepStatsUnfinishedSimsPaths)
 
