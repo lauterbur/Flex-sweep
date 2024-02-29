@@ -14,83 +14,19 @@ import glob
 import numpy as np
 import os
 
-def read(argsDict, stat):
+def read(argsDict, stat, fileList):
         # make a pandas table with columns of:
         ## position
         ## statistic value
         ## derived allele frequency
         values = pd.DataFrame()
-        center = int(argsDict["locusLength"]/2)
-        files = glob.glob(f"{argsDict['outputDir']}/training_data/neutral_data/stats/neutral_data_*_c{center}.{stat}")
-        if stat == "ihs":
-                for file in files:
-                        df=pd.read_csv(file, sep='\s', names=["position","index","DAF","iHH_0","iHH_1","iHS","standardized_iHS"], engine='python', skiprows=1) # read ihs file, these have headers that I want to replace
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','iHS','DAF']]
-                values=values.rename(columns={'iHS':'stat'})
-        if stat == "iSAFE":
-                for file in files:
-                        df=pd.read_csv(file, sep='\t', names=["position","iSAFE","DAF"], engine='python', skiprows=1)
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','iSAFE','DAF']]        
-                values=values.rename(columns={'iSAFE':'stat'})
-        if stat == "nsl":
-                for file in files:
-                        df=pd.read_csv(file, sep='\s', names=["position","DAF","nSL"], engine='python') # no header
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','nSL','DAF']] 
-                values=values.rename(columns={'nSL':'stat'})
-        if stat == "DIND":
-                for file in files:
-                        df=pd.read_csv(file, sep=' ', names=["position","DIND","DAF"], engine='python', skiprows=1)
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','DIND','DAF']] 
-                values=values.rename(columns={'DIND':'stat'})
-        if stat == "hDo":
-                for file in files:
-                        df=pd.read_csv(file, sep=' ', names=["position","hDo","DAF"], engine='python', skiprows=1)
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','hDo','DAF']] 
-                values=values.rename(columns={'hDo':'stat'})
-        if stat == "hDs":
-                for file in files:
-                        df=pd.read_csv(file, sep=' ', names=["position","hDs","DAF"], engine='python', skiprows=1)
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','hDs','DAF']] 
-                values=values.rename(columns={'hDs':'stat'})
-        if stat == "hf":
-                for file in files:
-                        df=pd.read_csv(file, sep=' ', names=["position","hf","DAF"], engine='python', skiprows=1)
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','hf','DAF']] 
-                values=values.rename(columns={'hf':'stat'})
-        if stat == "lf":
-                for file in files:
-                        df=pd.read_csv(file, sep=' ', names=["position","lf","DAF"], engine='python', skiprows=1)
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','lf','DAF']] 
-                values=values.rename(columns={'lf':'stat'})
-        if stat == "S":
-                for file in files:
-                        df=pd.read_csv(file, sep=' ', names=["position","S","DAF"], engine='python', skiprows=1)
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','S','DAF']] 
-                values=values.rename(columns={'S':'stat'})
-        if stat == "HAF":
-                for file in files:
-                        df=pd.read_csv(file, sep=' ', names=["position","HAF"], engine='python', skiprows=0)
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','HAF']] 
+#        center = int(argsDict["locusLength"]/2)
+        for file in fileList:
+                df = pd.read_csv(file, sep='\s', names=["position","stat","DAF"], engine='python', skiprows=0)
+                values = pd.concat([values,df], ignore_index=True) # concatenate with previous files read
+        values = values.loc[values['stat'] == stat]
+        if stat == "HAF" or stat == "H12":
                 values['DAF']=1 # because there needs to be a value for DAF to get bins
-                values=values.rename(columns={'HAF':'stat'})
-        if stat == "H12":
-                for file in files:
-                        df=pd.read_csv(file, sep='\s+', names=["position","H12"], engine='python', skiprows=0)
-                        values=pd.concat([values,df], ignore_index=True) # concatenate with previous files read
-                values=values[['position','H12']] 
-                values['DAF']=1 # because there needs to be a value for DAF to get bins
-                values=values.rename(columns={'H12':'stat'})
-
         return values
 
 def bin(values, freq=.02):
@@ -122,6 +58,7 @@ def normalize(values, argsDict, stat):
 
 def main(argsDict, stat):
         os.makedirs(f"{argsDict['outputDir']}/training_data/neutral_data/stats/bins", exist_ok=True)
+        fileList = glob.glob(f"{argsDict['outputDir']}/training_data/neutral_data/stats/neutral_data_*_fulllocus.stats")
         values = read(argsDict, stat)
         bin_values = bin(values)
         norm_values = normalize(bin_values, argsDict, stat)
