@@ -54,17 +54,20 @@ def chromAllStatsMissing(argsDict, sims):
         sims = [os.path.basename(x) for x in sims]
         simPre = [os.path.splitext(x)[0] for x in sims]
         simDict = dict(zip(simPre,simPaths))
-        center = int(argsDict["locusLength"]/2)
+#        center = int(argsDict["locusLength"]/2)
         statsUnfinished=set()
         for sim in simDict:
                 if "neutral" in sims[0]:
+                        statFile = pd.read_csv(file, sep='\s', names=["stat", "position","value","DAF"], engine='python', skiprows=1) # load full statfile
                         for stat in ["DIND","hDo","hDs","hf","lf","S","ihs","iSAFE","nsl","H12","HAF"]:
-                                if not os.path.exists(f"{simDict[sim]}/stats/{sim}_c{center}.{stat}") or not os.path.getsize(f"{simDict[sim]}/stats/{sim}_c{center}.{stat}") > 0:
-                                        statsUnfinished.add(f"{simDict[sim]}/stats/{sim}_c{center}.{stat}")
+                                statVals = statFile.loc[statFile['stat'] == stat]
+                                if statVals.empty:
+                                        statsUnfinished.add((sim, stat))
                 else:
                         for stat in ["DIND","hDo","hDs","hf","lf","S","H12","HAF"]:
-                                if not os.path.exists(f"{simDict[sim]}/stats/{sim}_c{center}.{stat}") or not os.path.getsize(f"{simDict[sim]}/stats/{sim}_c{center}.{stat}") > 0:
-                                        statsUnfinished.add(f"{simDict[sim]}/stats/{sim}_c{center}.{stat}")
+                                statVals = statFile.loc[statFile['stat'] == stat]
+                                if statVals.empty:
+                                        statsUnfinished.add((sim, stat))
         return statsUnfinished
 
 def centerAllStatsMissing(argsDict, simList):
