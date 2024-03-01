@@ -114,8 +114,8 @@ def simulateWrap(argsDict):
                         Parallel(n_jobs=argsDict["numJobs"])(delayed(simulate)(argsDict, configDict, "neutral", i, argsDict["numberChroms"], argsDict["locusLength"]) for i in neutralUnfinished)
                         unFinished(argsDict, "neutral")
                         print(f"running {numMissSweep} missing sweep simulations")
-                        unFinished(argsDict, "sweep")
                         Parallel(n_jobs=argsDict["numJobs"])(delayed(simulate)(argsDict, configDict, "sweep", i, argsDict["numberChroms"], argsDict["locusLength"]) for i in sweepUnfinished)
+                        unFinished(argsDict, "sweep")
                 elif neutralUnfinished and not sweepUnfinished: # if not all neutral sims got correctly made from a previous run, try them again
                         print(f"running {numMissNeut} missing neutral simulations")
                         Parallel(n_jobs=argsDict["numJobs"])(delayed(simulate)(argsDict, configDict, "neutral", i, argsDict["numberChroms"], argsDict["locusLength"]) for i in neutralUnfinished)
