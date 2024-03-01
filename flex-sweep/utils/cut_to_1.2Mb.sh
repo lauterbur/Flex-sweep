@@ -24,12 +24,15 @@ fi
 while [ $(( $STARTPOS + $STEP )) -lt $LASTPOS ]
 do
         ENDPOS=$(( $WINDOW + $STARTPOS ))
-        awk -v start="$STARTPOS" -v stop="$ENDPOS" '$2 >= start && $2 <= stop {print $0}' $MAP > ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.map
-        read -r STARTHAP<<<$(awk -v start="$STARTPOS" -v stop="$ENDPOS" '$2 >= start && $2 <= stop {print $2,NR}' $MAP | awk '{print $2}' | head -1)
-        read -r STOPHAP<<<$(awk -v start="$STARTPOS" -v stop="$ENDPOS" '$2 >= start && $2 <= stop {print $2,NR}' $MAP | awk '{print $2}' | tail -1)
+        echo $ENDPOS
+        awk -v start="$STARTPOS" -v stop="$ENDPOS" '$3 >= start && $3 <= stop {print $0}' $MAP > ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.map
+        read -r STARTHAP<<<$(awk -v start="$STARTPOS" -v stop="$ENDPOS" '$3 >= start && $3 <= stop {print $2,NR}' $MAP | awk '{print $2}' | head -1)
+        read -r STOPHAP<<<$(awk -v start="$STARTPOS" -v stop="$ENDPOS" '$3 >= start && $3 <= stop {print $2,NR}' $MAP | awk '{print $2}' | tail -1)
+        echo $STARTHAP
+        echo $STOPHAP
         sed -n "${STARTHAP},${STOPHAP}p" $HAP > ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.hap
 
-        ml=$( wc -l ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.map | cut -d" " -f1)
+        ml=$( wc -l ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.map | cut -d" " -f1 )
         wc -l ${OUT}/${CLASSNAME}_${STARTPOS}-${ENDPOS}.hap
 
         if [[ $ml -lt 100 ]]

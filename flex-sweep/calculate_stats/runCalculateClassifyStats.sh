@@ -12,6 +12,7 @@ for CENTER in `seq 500000 10000 700000`
 do
 	OUTNAME=${SIMBASE}_c${CENTER}
 
+	#echo "Rscript --vanilla calculate_stats/convertHapMap.R -m $SIMPATH/$SIMBASE.map -p $SIMPATH/$SIMBASE.hap -o $SIMPATH/$SIMBASE -l ${LOCUS} -c ${CENTER} -w 1000000 -s $START"
 	Rscript --vanilla calculate_stats/convertHapMap.R -m $SIMPATH/$SIMBASE.map -p $SIMPATH/$SIMBASE.hap -o $SIMPATH/$SIMBASE -l ${LOCUS} -c ${CENTER} -w 1000000 -s $START
 
         # iSAFE - if it works with iSAFE, good, if not, run SAFE
@@ -51,6 +52,7 @@ done
 CENTER=${HALFLOCUS}
 OUTNAME=${SIMBASE}_c${CENTER}
         # run hap and map script for full chromosome first
+        echo "Rscript --vanilla calculate_stats/convertHapMapLocus.R -m $SIMPATH/$SIMBASE.map -p $SIMPATH/$SIMBASE.hap -o $SIMPATH/$SIMBASE -l ${LOCUS} -c ${HALFLOCUS} -w ${LOCUS} -s $START"
         Rscript --vanilla calculate_stats/convertHapMapLocus.R -m $SIMPATH/$SIMBASE.map -p $SIMPATH/$SIMBASE.hap -o $SIMPATH/$SIMBASE -l ${LOCUS} -c ${HALFLOCUS} -w ${LOCUS} -s $START
 
 

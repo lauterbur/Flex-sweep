@@ -77,6 +77,7 @@ def _count_generator(reader):
 def simulateWrap(argsDict):
         runs=list(range(1,argsDict["numberSims"]+1))
         neutral, sweep, configDict = trainingArray(argsDict) # make training arrays
+        print(configDict)
         if argsDict["continue"]:
                 print("checking previous simulation runs because you ran with --continue, this can take a little while")
                 neutralUnfinished=[]

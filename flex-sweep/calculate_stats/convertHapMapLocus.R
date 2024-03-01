@@ -41,10 +41,12 @@ print(opt$map)
 print(opt$hap)
 map<-read.table(opt$map)
 hap<-read.table(opt$hap,colClasses="character")
+str(hap)
 
 names(map)<-c("chr","ID","genpos","physpos")
 map$ID<-rownames(map)
 map$physpos<-map$physpos-opt$start
+str(map)
 
 chr<-map[1,1]
     # .map
