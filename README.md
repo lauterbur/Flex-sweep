@@ -1,3 +1,5 @@
+# This version is no longer under development, please see https://github.com/jmurga/flexsweep for the newest version.
+
 # Flex-sweep
 Versatile tool for detecting selective sweeps with a variety of ages, strengths, starting allele frequencies, and completeness.
 
